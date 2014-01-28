@@ -11,44 +11,35 @@
 #include "Sock.h"
 
 namespace CommLib {
-    class ProtocolParser;
-    class Epoll;
+    //    class ProtocolParser;
+    //    class Epoll;
 
     class TcpSock : public Sock {
     public:
 
-        TcpSock(ProtocolParser* pParser, Epoll*pPoll)
-        : Sock(PF_INET, SOCK_STREAM, 0)
-        , pParser_(pParser), pPoll_(pPoll) {
+        TcpSock( )
+        : Sock(PF_INET, SOCK_STREAM, 0) {
+        }
+
+        TcpSock( int sock) {
+            this->Attach(sock);
         }
 
         ~TcpSock() {
         }
 
     public:
-        int RegistEpoll();
-        int UnRegistEpoll();
-
         virtual int Send(void *buf, int nbytes);
         virtual int Recv(void *buf, int nbytes);
-
-        virtual int OnRecv();
-        virtual int OnSend();
-        virtual int OnClose();
-
-    protected:
-        ProtocolParser* pParser_;
-        Epoll* pPoll_;
     };
 
     class TcpServSock : public TcpSock {
     public:
-        TcpServSock(ProtocolParser* pParser, Epoll*pPoll)
-        : TcpSock(pParser, pPoll) {
-        }
+
     public:
         virtual int OnRecv();
-        
+        virtual int OnAccept() = 0;
+
     };
 }
 #endif	/* TCPSOCK_H */

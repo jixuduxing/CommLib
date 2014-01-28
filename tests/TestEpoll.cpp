@@ -10,44 +10,84 @@
 #include "../TcpSock.h"
 #include "../Parser.h"
 #include "../Epoll.h"
+#include "../MemPool.h"
+#include "../TcpEpollServer.h"
 /*
  * Simple C++ Test Suite
  */
-class TestParser:public CommLib::ProtocolParser
-{
-    public:
-        virtual bool parse(char* buff, int len)
-        {
-            char *buffnew =new char[ len +1 ];
-            memcpy( buffnew ,buff,len );
-            buffnew[ len ] = 0;
-            
-            std::cout<< buffnew <<std::endl;
-        }
+class TestParser : public CommLib::ProtocolParser {
+public:
+
+    virtual bool parse(char* buff, int len) {
+        char *buffnew = new char[ len + 1 ];
+        memcpy(buffnew, buff, len);
+        buffnew[ len ] = 0;
+
+        std::cout << buffnew << std::endl;
+    }
 };
 
 void test1() {
     std::cout << "TestEpoll test 1" << std::endl;
-    
-    CommLib::Epoll2 ep;
-    TestParser* parser = new TestParser();
-    
-    CommLib::SockAddr addr( 2080,"0.0.0.0",CommLib::Sock::IP );
-    
-    CommLib::TcpServSock ssock( parser ,&ep  );
-    ssock.Bind( addr );
-    ssock.Listen( 10 );
-    ssock.RegistEpoll();
-    
-    while( 1 )
-    {
-            ep.Schedule( 10 );
-    }
+
+    //    CommLib::Epoll2 ep;
+    //    TestParser* parser = new TestParser();
+    //
+    //    CommLib::SockAddr addr(2080, "0.0.0.0", CommLib::Sock::IP);
+    //
+    //    CommLib::TcpServSock ssock(parser, &ep);
+    //    ssock.Bind(addr);
+    //    ssock.Listen(10);
+    //    ssock.RegistEpoll();
+    //
+    //    while (ep.Schedule(10)) {
+    //    }
+
+    std::cout << " end " << std::endl;
 }
 
+class MyTcpSock : CommLib::TcpSock {
+public:
+    MyTcpSock()
+    {
+    }
+    
+    virtual int OnRecv()
+    {
+        AllocPack* pack = MemPool::defaultMp()->Alloc(1024);
+        if (pack) {
+            int len = Recv((void*) pack->getbuffer(), pack->getsize());
+
+            if (len > 0) {
+                pack->SetLength(len);
+                pParser_->parse((char*) pack->getbuffer(), pack->getlengh());
+            }
+            pack->release();
+
+            return len;
+        }
+        return -1;
+    }
+    virtual int OnSend()
+    { return 0;}
+    virtual int OnClose() 
+    {
+        Close( );
+        return 0;
+    }
+    
+    TestParser* pParser_;
+};
+
 void test2() {
+
+//    CommLib::EpollSimple* pEpoll 
+    CommLib::TcpEpollServer<MyTcpSock> server(new CommLib::EpollSimple(), new CommLib::MemPool() );
+    server.Start( 2080 );
+    while(1)
+        sleep(1);
     std::cout << "TestEpoll test 2" << std::endl;
-//    std::cout << "%TEST_FAILED% time=0 testname=test2 (TestEpoll) message=error message sample" << std::endl;
+    //    std::cout << "%TEST_FAILED% time=0 testname=test2 (TestEpoll) message=error message sample" << std::endl;
 }
 
 int main(int argc, char** argv) {

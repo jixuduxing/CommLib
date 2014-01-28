@@ -7,11 +7,15 @@
 
 #include "Epoll.h"
 #include "Sock.h"
+#include <assert.h>
 
 namespace CommLib {
 
-    Epoll::Epoll() {
-        epoll_ = epoll_create(10);
+    Epoll::Epoll( int size = Epoll_MaxSize ) {
+        assert( size <= Epoll_MaxSize );
+        epollsize_ = size;
+        pEvents_ = new struct epoll_event[epollsize_];
+        epoll_ = epoll_create( epollsize_ );
     }
 
     Epoll::~Epoll() {
@@ -42,13 +46,34 @@ namespace CommLib {
         return epollctl(Op_MOD, sock, event);
     }
 
-    void Epoll2::Schedule(int sec) {
-        int nfds = epollwait( events, Epoll_Size, sec );
-        if (-1 != nfds) {
-            for (int i = 0; i < nfds; i++) {
-                Sock* sk = (Sock*) events[i].data.ptr;
-                sk->OnRecv();
+    EpollSimple::EpollSimple( int size )
+    {
+        
+    }
+    
+    bool EpollSimple::Schedule(int sec) {
+        
+        int nfds = epollwait( pEvents_, GetEpollSize(), sec );
+        if ( -1 != nfds ) {
+            for ( int i = 0; i < nfds; i++ ) {
+                Sock* sk = (Sock*) pEvents_[i].data.ptr;
+                if( pEvents_[i].events & Epoll::EVENT_CLOSE )
+                {
+                    sk->OnClose();
+                    this->epollDel(sk);
+                }
+                else 
+                {
+                    if( pEvents_[i].events & Epoll::EVENT_READ )
+                         sk->OnRecv( );
+                    
+                    if( pEvents_[i].events & Epoll::EVENT_WRITE )
+                         sk->OnSend( );
+                }
             }
+            return true;
         }
+        
+        return false;
     }
 }

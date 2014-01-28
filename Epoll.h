@@ -11,16 +11,20 @@
 #include <sys/epoll.h>
 #include <boost/noncopyable.hpp>
 
+#define Epoll_MaxSize 1024
+
 namespace CommLib {
 
     class Sock;
+
     class Epoll : boost::noncopyable {
     public:
 
         enum EpollEvent {
             EVENT_READ = EPOLLIN,
             EVENT_WRITE = EPOLLOUT,
-            EVENT_LET = EPOLLET,        //边缘触发  默认水平触发
+            EVENT_CLOSE = EPOLLHUP,
+            EVENT_LET = EPOLLET, //边缘触发  默认水平触发
         };
 
         enum EpollOp {
@@ -29,26 +33,37 @@ namespace CommLib {
             Op_MOD = EPOLL_CTL_MOD,
         };
 
-        Epoll();
+        Epoll(int size = Epoll_MaxSize);
         virtual ~Epoll();
 
-        int epollAdd( Sock* sock, int event ); 
-        int epollDel( Sock* sock );
-        int epollMod( Sock* sock, int event );
+        virtual bool Schedule(int sec) = 0;
+        int epollAdd(Sock* sock, int event);
+        int epollDel(Sock* sock);
+        int epollMod(Sock* sock, int event);
 
-        virtual int epollwait( struct epoll_event *events, int maxevents, int timeout );
+        virtual int epollwait(struct epoll_event *events, int maxevents, int timeout);
+
+        int GetEpollSize()
+        {
+            return epollsize_;
+        }
+    protected:
+        struct epoll_event* pEvents_;
+
     private:
         int epoll_;
-        int epollctl( EpollOp op, Sock* sock, int event );
+        int epollsize_;
+        int epollctl(EpollOp op, Sock* sock, int event);
     };
-    
-#define Epoll_Size 1024
-    
-    class Epoll2:public Epoll
-    {
+
+    class EpollSimple : public Epoll {
     public:
-        void Schedule( int sec );
-        struct epoll_event events[Epoll_Size];
+
+        EpollSimple(int size = Epoll_MaxSize)
+        : Epoll(size) {
+        };
+        ~EpollSimple();
+        virtual bool Schedule(int sec);
     };
 }
 #endif	/* EPOOL_H */

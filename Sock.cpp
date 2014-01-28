@@ -19,12 +19,12 @@ namespace CommLib {
 
     int Sock::Bind(SockAddr& addr) {
         localaddr_ = addr;
-        return bind(sock_, (struct sockaddr*) &addr.addr_, sizeof (addr));
+        return bind(sock_, (struct sockaddr*) &addr.GetAddr_in(), sizeof (addr));
     }
 
     int Sock::Connect(SockAddr& addr) {
         remoteaddr_ = addr;
-        return connect(sock_, (struct sockaddr*) &addr.addr_, sizeof (addr));
+        return connect(sock_, (struct sockaddr*) &addr.GetAddr_in(), sizeof (addr));
     }
 
     int Sock::Listen(int nlistens) {

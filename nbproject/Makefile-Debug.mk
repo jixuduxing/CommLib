@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/Semaphore.o \
 	${OBJECTDIR}/Sock.o \
+	${OBJECTDIR}/TcpEpollServer.o \
 	${OBJECTDIR}/TcpSock.o \
 	${OBJECTDIR}/Thread.o \
 	${OBJECTDIR}/ThreadLoop.o \
@@ -116,6 +117,11 @@ ${OBJECTDIR}/Sock.o: Sock.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Sock.o Sock.cpp
+
+${OBJECTDIR}/TcpEpollServer.o: TcpEpollServer.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TcpEpollServer.o TcpEpollServer.cpp
 
 ${OBJECTDIR}/TcpSock.o: TcpSock.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -299,6 +305,19 @@ ${OBJECTDIR}/Sock_nomain.o: ${OBJECTDIR}/Sock.o Sock.cpp
 	    $(COMPILE.cc) -g -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Sock_nomain.o Sock.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/Sock.o ${OBJECTDIR}/Sock_nomain.o;\
+	fi
+
+${OBJECTDIR}/TcpEpollServer_nomain.o: ${OBJECTDIR}/TcpEpollServer.o TcpEpollServer.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/TcpEpollServer.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TcpEpollServer_nomain.o TcpEpollServer.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/TcpEpollServer.o ${OBJECTDIR}/TcpEpollServer_nomain.o;\
 	fi
 
 ${OBJECTDIR}/TcpSock_nomain.o: ${OBJECTDIR}/TcpSock.o TcpSock.cpp 

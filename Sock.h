@@ -32,8 +32,12 @@ namespace CommLib {
         sockaddr_in& GetAddr_in() {
             return addr_;
         }
+        
+        void SetAddr_in(sockaddr_in& addr) {
+            addr_ = addr;
+        }
 
-    protected:
+    private:
         struct sockaddr_in addr_;
         friend class Sock;
     };
@@ -47,6 +51,7 @@ namespace CommLib {
             UDP = SOCK_DGRAM,
         };
 
+        Sock();
         Sock(int __domain, int __type, int __protocol);
 
         void Attach(int sock);
@@ -71,7 +76,8 @@ namespace CommLib {
         virtual int OnClose() = 0;
 
         virtual ~Sock();
-    protected:
+        
+    private:
         int sock_;
 
         SockAddr localaddr_;
