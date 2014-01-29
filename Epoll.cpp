@@ -11,11 +11,11 @@
 
 namespace CommLib {
 
-    Epoll::Epoll( int size = Epoll_MaxSize ) {
-        assert( size <= Epoll_MaxSize );
+    Epoll::Epoll(int size) {
+        assert(size <= Epoll_MaxSize);
         epollsize_ = size;
         pEvents_ = new struct epoll_event[epollsize_];
-        epoll_ = epoll_create( epollsize_ );
+        epoll_ = epoll_create(epollsize_);
     }
 
     Epoll::~Epoll() {
@@ -38,7 +38,7 @@ namespace CommLib {
         return epollctl(Op_ADD, sock, event);
     }
 
-    int Epoll::epollDel(Sock* sock ) {
+    int Epoll::epollDel(Sock* sock) {
         return epollctl(Op_DEL, sock, 0);
     }
 
@@ -46,34 +46,39 @@ namespace CommLib {
         return epollctl(Op_MOD, sock, event);
     }
 
-    EpollSimple::EpollSimple( int size )
-    {
-        
+    EpollSimple::EpollSimple(int size)
+    : Epoll(size) {
     }
-    
+
+    EpollSimple::~EpollSimple() {
+    }
+
     bool EpollSimple::Schedule(int sec) {
-        
-        int nfds = epollwait( pEvents_, GetEpollSize(), sec );
-        if ( -1 != nfds ) {
-            for ( int i = 0; i < nfds; i++ ) {
+
+        int nfds = epollwait(pEvents_, GetEpollSize(), sec);
+        if (-1 != nfds) {
+            for (int i = 0; i < nfds; i++) {
                 Sock* sk = (Sock*) pEvents_[i].data.ptr;
-                if( pEvents_[i].events & Epoll::EVENT_CLOSE )
-                {
+                if (pEvents_[i].events & Epoll::EVENT_CLOSE) {
                     sk->OnClose();
                     this->epollDel(sk);
-                }
-                else 
-                {
-                    if( pEvents_[i].events & Epoll::EVENT_READ )
-                         sk->OnRecv( );
-                    
-                    if( pEvents_[i].events & Epoll::EVENT_WRITE )
-                         sk->OnSend( );
+                } else {
+                    if (pEvents_[i].events & Epoll::EVENT_READ)
+                        sk->OnRecv();
+
+                    if (pEvents_[i].events & Epoll::EVENT_WRITE)
+                        sk->OnSend();
                 }
             }
             return true;
         }
         
+        if ( errno == EINTR )  
+        {
+           return true;  
+        }
+        
+        perror("EpollSimple::Schedule");
         return false;
     }
 }

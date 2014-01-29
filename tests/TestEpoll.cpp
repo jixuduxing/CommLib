@@ -7,6 +7,9 @@
 
 #include <stdlib.h>
 #include <iostream>
+
+#include <boost/shared_ptr.hpp>
+
 #include "../TcpSock.h"
 #include "../Parser.h"
 #include "../Epoll.h"
@@ -46,14 +49,22 @@ void test1() {
     std::cout << " end " << std::endl;
 }
 
-class MyTcpSock : CommLib::TcpSock {
+class MyTcpSock : public CommLib::TcpSock {
 public:
-    MyTcpSock()
+    MyTcpSock( int sock ):
+    CommLib::TcpSock( sock )
     {
+        pParser_ = new TestParser();
     }
+//    MyTcpSock()
+//    {
+//        pParser_ = new TestParser();
+//    }
     
     virtual int OnRecv()
     {
+        using namespace CommLib;
+        
         AllocPack* pack = MemPool::defaultMp()->Alloc(1024);
         if (pack) {
             int len = Recv((void*) pack->getbuffer(), pack->getsize());
@@ -68,8 +79,10 @@ public:
         }
         return -1;
     }
+    
     virtual int OnSend()
     { return 0;}
+    
     virtual int OnClose() 
     {
         Close( );
@@ -82,10 +95,15 @@ public:
 void test2() {
 
 //    CommLib::EpollSimple* pEpoll 
-    CommLib::TcpEpollServer<MyTcpSock> server(new CommLib::EpollSimple(), new CommLib::MemPool() );
+    CommLib::TcpEpollServer<MyTcpSock> server( 
+            boost::shared_ptr<CommLib::Epoll >( new CommLib::EpollSimple() ), 
+            boost::shared_ptr<CommLib::MemPool >( new CommLib::MemPool() ) );
     server.Start( 2080 );
     while(1)
-        sleep(1);
+    { sleep(1);
+//        server.Schedule();
+    }
+       
     std::cout << "TestEpoll test 2" << std::endl;
     //    std::cout << "%TEST_FAILED% time=0 testname=test2 (TestEpoll) message=error message sample" << std::endl;
 }

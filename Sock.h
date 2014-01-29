@@ -29,6 +29,11 @@ namespace CommLib {
             addr_.sin_addr.s_addr = inet_addr(addr.c_str());
         }
 
+        SockAddr( sockaddr_in& addr )
+        {
+            addr_ = addr;
+        }
+        
         sockaddr_in& GetAddr_in() {
             return addr_;
         }

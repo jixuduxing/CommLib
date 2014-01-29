@@ -12,6 +12,17 @@
 
 namespace CommLib {
 
+    TcpSock::TcpSock()
+    : Sock(PF_INET, SOCK_STREAM, 0) {
+    }
+
+    TcpSock::TcpSock(int sock) {
+        this->Attach(sock);
+    }
+
+    TcpSock::~TcpSock() {
+    }
+
     int TcpSock::Send(void *buf, int nbytes) {
         return send(Getsock(), buf, nbytes, 0);
     }
@@ -20,61 +31,51 @@ namespace CommLib {
         return recv(Getsock(), buf, nbytes, 0);
     }
 
-//    int TcpSock::OnRecv() {
-//        AllocPack* pack = MemPool::defaultMp()->Alloc(1024);
-//        if (pack) {
-//            int len = Recv((void*) pack->getbuffer(), pack->getsize());
-//
-//            if (len > 0) {
-//                pack->SetLength(len);
-////                pParser_->parse((char*) pack->getbuffer(), pack->getlengh());
-//            }
-//            pack->release();
-//
-//            return len;
-//        }
-//        return -1;
-//    }
-//
-//    int TcpSock::RegistEpoll() {
-//        return pPoll_->epollAdd(this, Epoll::EVENT_READ);
-//    }
-//
-//    int TcpSock::UnRegistEpoll() {
-//        return pPoll_->epollDel(this);
-//    }
+    //    int TcpSock::OnRecv() {
+    //        AllocPack* pack = MemPool::defaultMp()->Alloc(1024);
+    //        if (pack) {
+    //            int len = Recv((void*) pack->getbuffer(), pack->getsize());
+    //
+    //            if (len > 0) {
+    //                pack->SetLength(len);
+    ////                pParser_->parse((char*) pack->getbuffer(), pack->getlengh());
+    //            }
+    //            pack->release();
+    //
+    //            return len;
+    //        }
+    //        return -1;
+    //    }
+    //
+    //    int TcpSock::RegistEpoll() {
+    //        return pPoll_->epollAdd(this, Epoll::EVENT_READ);
+    //    }
+    //
+    //    int TcpSock::UnRegistEpoll() {
+    //        return pPoll_->epollDel(this);
+    //    }
 
-//    int TcpSock::OnSend() {
-//        return 0;
-//    }
-//
-//    int TcpSock::OnClose() {
-//  //      perror("OnClose");
-////        UnRegistEpoll();
-//        Close();
-//        return 1;
-//    }
+    //    int TcpSock::OnSend() {
+    //        return 0;
+    //    }
+    //
+    //    int TcpSock::OnClose() {
+    //  //      perror("OnClose");
+    ////        UnRegistEpoll();
+    //        Close();
+    //        return 1;
+    //    }
 
     int TcpServSock::OnRecv() {
         return OnAccept();
+    }
 
-//        TcpSock* sock = new TcpSock(
-////                pParser_, pPoll_
-//                );
-//        sockaddr_in addr;
-//        socklen_t addrlen = sizeof (sockaddr_in);
-//        int socket = accept(Getsock(), (struct sockaddr *) &(sock->GetRemoteAddr().GetAddr_in()),
-//                &addrlen);
-//        if (socket < 0) {
-//            delete sock;
-//            return 0;
-//        }
-//        sock->Attach(socket);
-////        if (sock->RegistEpoll() < 0) {
-////            sock->Close();
-////            delete sock;
-////            return 0;
-////        }
-//        return -1;
+    int TcpServSock::OnSend() {
+        return 0;
+    }
+
+    int TcpServSock::OnClose() {
+        Close();
+        return 0;
     }
 }

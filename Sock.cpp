@@ -13,6 +13,10 @@
 
 namespace CommLib {
 
+    Sock::Sock()
+    {
+    }
+    
     Sock::Sock(int __domain, int __type, int __protocol) {
         sock_ = socket(__domain, __type, __protocol);
     }

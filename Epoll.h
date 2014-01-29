@@ -59,9 +59,7 @@ namespace CommLib {
     class EpollSimple : public Epoll {
     public:
 
-        EpollSimple(int size = Epoll_MaxSize)
-        : Epoll(size) {
-        };
+        EpollSimple(int size = Epoll_MaxSize);
         ~EpollSimple();
         virtual bool Schedule(int sec);
     };

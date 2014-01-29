@@ -17,16 +17,11 @@ namespace CommLib {
     class TcpSock : public Sock {
     public:
 
-        TcpSock( )
-        : Sock(PF_INET, SOCK_STREAM, 0) {
-        }
+        TcpSock();
 
-        TcpSock( int sock) {
-            this->Attach(sock);
-        }
+        TcpSock(int sock) ;
 
-        ~TcpSock() {
-        }
+        ~TcpSock() ;
 
     public:
         virtual int Send(void *buf, int nbytes);
@@ -38,6 +33,9 @@ namespace CommLib {
 
     public:
         virtual int OnRecv();
+        virtual int OnSend();
+        virtual int OnClose();
+        
         virtual int OnAccept() = 0;
 
     };
