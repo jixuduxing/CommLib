@@ -180,10 +180,14 @@ namespace CommLib {
         }
         virtual AllocPack* Alloc( )
         {
-            CAutoLock al(lock_);
-            AllocPack* pPack = NULL;
-            pPack = PackList.RemoveHead();
-            if( !pPack )
+             AllocPack* pPack = NULL;
+
+             {
+                CAutoLock al(lock_);
+                pPack = PackList.RemoveHead();
+             }
+
+             if( !pPack )
                 pPack = new AllocPack2( buffsize_,this );
 //            if( NULL != pPackList )
 //            {
@@ -200,9 +204,9 @@ namespace CommLib {
         
         virtual void Free(AllocPack* pPack)
         {
-            CAutoLock al(lock_);
-
             pPack->reset();
+
+            CAutoLock al(lock_);
             PackList.AddTail( (AllocPack2*)pPack );
             
 //            AllocPack2* temp = NULL;
