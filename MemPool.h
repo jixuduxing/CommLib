@@ -105,6 +105,7 @@ namespace CommLib {
         bool Append(T n);
     };
 
+    //include the ptr point to the next
     class AllocPack2 : public AllocPack {
     protected:
         AllocPack2* next_;

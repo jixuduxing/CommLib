@@ -154,7 +154,7 @@ namespace CommLib {
 
     AllocPackListSimple::~AllocPackListSimple() {
         for (AllocPack2* pPack = PackList.RemoveHead();
-                pPack != NULL; ) {
+                pPack != NULL; pPack = PackList.RemoveHead()) {
             delete pPack;
         }
     }
@@ -271,6 +271,7 @@ namespace CommLib {
                 break;
         }
 
+        return -1;
         return i;
     }
 }
