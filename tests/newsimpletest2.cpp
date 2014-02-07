@@ -38,7 +38,7 @@ int main() {
     gettimeofday(&tm,NULL);
     std::cout<<"m:"<<tm.tv_sec<<" hm"<< tm.tv_usec <<std::endl;
 
-    boost::shared_ptr<MemPool> mp(new MemPool(100));
+    boost::shared_ptr<MemPool> mp(new MemPool(MemPool::SimpleList_Mp));
     
 //    typedef boost::function<void () > MyFun;
 //    MyFun func = boost::bind(&threadFun, mp);

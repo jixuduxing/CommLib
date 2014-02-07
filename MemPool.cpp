@@ -148,26 +148,53 @@ namespace CommLib {
         os << " free:" << PackFreeList_.size() << std::endl;
     }
 
-    AllocPackList3::AllocPackList3(int ind)
+    AllocPackListSimple::AllocPackListSimple(int ind)
     : AllocPackList(ind) {
-        pPackList = NULL;
     }
 
-    AllocPackList3::~AllocPackList3() {
+    AllocPackListSimple::~AllocPackListSimple() {
+        for (AllocPack2* pPack = PackList.RemoveHead();
+                pPack != NULL; ) {
+            delete pPack;
+        }
     }
 
-    MemPool::MemPool(int type) {
+    void AllocPackListSimple::PrintfSelf(std::ostream& os) {
+        CAutoLock al(lock_);
+        os << " free:" << PackList.size() << std::endl;
+    }
+
+    AllocPack* AllocPackListSimple::Alloc() {
+        AllocPack* pPack = NULL;
+        {
+            CAutoLock al(lock_);
+            pPack = PackList.RemoveHead();
+        }
+
+        if (!pPack)
+            pPack = new AllocPack2(buffsize_, this);
+        return pPack;
+    }
+
+    void AllocPackListSimple::Free(AllocPack* pPack) {
+        pPack->reset();
+
+        CAutoLock al(lock_);
+        PackList.AddTail((AllocPack2*) pPack);
+    }
+
+    MemPool::MemPool(MemPoolType type) {
         VectSize_ = MAX_SIZE - MIN_SIZE + 1;
 
         AllocPackListVec_.resize(VectSize_);
 
         for (int i = 0; i < VectSize_; i++) {
-            if (0 == type)
+            if (default_Mp == type)
                 AllocPackListVec_[i] = new AllocPackList(i);
-            else if( 1== type)
+            else if (careusing_Mp == type)
                 AllocPackListVec_[i] = new AllocPackList2(i);
             else
-                AllocPackListVec_[i] = new AllocPackList3(i);
+                AllocPackListVec_[i] = new AllocPackListSimple(i);
         }
     }
 

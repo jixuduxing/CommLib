@@ -18,60 +18,10 @@
 #include "Lock.h"
 
 namespace CommLib {
-    class AllocPackList;
-
-    class AllocPack : boost::noncopyable {
-    public:
-        const char* getbuffer();
-
-        int getlengh();
-        int getsize();
-
-        virtual void reset();
-        void release();
-
-        void SetLength(int len);
-    protected:
-        friend class AllocPackList;
-        friend class AllocPackList2;
-
-        AllocPackList* pAllocList_;
-        AllocPack(int size, AllocPackList* palloc);
-        ~AllocPack();
-
-    protected:
-        int len_;
-        char *buff_;
-        int size_;
-
-        bool Append(char* buff, int len);
-
-        template<typename T>
-        bool Append(T n);
-    };
-
-    class AllocPack2 : public AllocPack {
-    public:
-        AllocPack2* next_;
-        friend class AllocPackList3;
-    protected:
-        virtual void reset()
-        {
-            next_ = NULL;
-            AllocPack::reset();
-        }
-        AllocPack2(int size, AllocPackList* palloc)
-                :AllocPack( size,palloc)
-        {
-            next_ = NULL;
-        }
-        ~AllocPack2();
-    };
     
     template<typename T>
     class SimpleList
     {
-        
     public:
         SimpleList()
         {
@@ -123,6 +73,57 @@ namespace CommLib {
         int size_;
     };
     
+    class AllocPackList;
+
+    class AllocPack : boost::noncopyable {
+    public:
+        const char* getbuffer();
+
+        int getlengh();
+        int getsize();
+
+        virtual void reset();
+        void release();
+
+        void SetLength(int len);
+    protected:
+        friend class AllocPackList;
+        friend class AllocPackList2;
+
+        AllocPackList* pAllocList_;
+        AllocPack(int size, AllocPackList* palloc);
+        ~AllocPack();
+
+    protected:
+        int len_;
+        char *buff_;
+        int size_;
+
+        bool Append(char* buff, int len);
+
+        template<typename T>
+        bool Append(T n);
+    };
+
+    class AllocPack2 : public AllocPack {
+    protected:
+        AllocPack2* next_;
+        friend class SimpleList<AllocPack2>;
+        friend class AllocPackListSimple;
+        
+    protected:
+        virtual void reset()
+        {
+            next_ = NULL;
+            AllocPack::reset();
+        }
+        AllocPack2(int size, AllocPackList* palloc)
+                :AllocPack( size,palloc)
+        {
+            next_ = NULL;
+        }
+    };
+    
     //
     // Min Size:7 Bytes
 #define MIN_SIZE 3
@@ -154,7 +155,6 @@ namespace CommLib {
     };
 
     //care the mem using
-
     class AllocPackList2 : public AllocPackList {
     public:
         AllocPackList2(int ind);
@@ -165,74 +165,32 @@ namespace CommLib {
         virtual void PrintfSelf(std::ostream& os);
     private:
         std::list<AllocPack*> PackUsingList_;
-
     };
     
-    class AllocPackList3 : public AllocPackList {
+    //using SimpleList Writen by self
+    class AllocPackListSimple : public AllocPackList {
     public:
-        AllocPackList3(int ind);
-        virtual ~AllocPackList3();
+        AllocPackListSimple(int ind);
+        virtual ~AllocPackListSimple();
 
-        virtual void PrintfSelf(std::ostream& os)
-        {
-            CAutoLock al(lock_);
-            os << " free:" << PackList.size() << std::endl;
-        }
-        virtual AllocPack* Alloc( )
-        {
-             AllocPack* pPack = NULL;
-
-             {
-                CAutoLock al(lock_);
-                pPack = PackList.RemoveHead();
-             }
-
-             if( !pPack )
-                pPack = new AllocPack2( buffsize_,this );
-//            if( NULL != pPackList )
-//            {
-//                pPack = pPackList;
-//                pPackList = pPackList->next_;
-//            }
-//            else
-//            {
-//                pPack = new AllocPack2( buffsize_,this );
-//            }
-            
-            return pPack;
-        }
+        virtual void PrintfSelf(std::ostream& os);
         
-        virtual void Free(AllocPack* pPack)
-        {
-            pPack->reset();
-
-            CAutoLock al(lock_);
-            PackList.AddTail( (AllocPack2*)pPack );
-            
-//            AllocPack2* temp = NULL;
-//            
-//            if( pPackList )
-//            {
-//                temp = pPackList;
-//                while( temp->next_ )
-//                {
-//                    temp = temp->next_;
-//                }
-//                temp->next_ =  (AllocPack2*)pPack;
-//            }
-//            else
-//                pPackList =  (AllocPack2*)pPack;
-            
-//            pPackList->next_ = (AllocPack2*)pPack;
-        }
+        virtual AllocPack* Alloc( );
+        
+        virtual void Free(AllocPack* pPack);
     private:
-        AllocPack2* pPackList;
-        
         SimpleList<AllocPack2> PackList;
     };
 
     class MemPool : boost::noncopyable {
     public:
+        enum MemPoolType
+        {
+            default_Mp,         //using deque
+            careusing_Mp,    //care memory using
+            SimpleList_Mp,    //using the list self
+        };
+        
         static MemPool* defaultMp( )
         {
             static MemPool* defmp = new MemPool();
@@ -240,7 +198,7 @@ namespace CommLib {
         }
         
         //default 0,no care the mem using,else care
-        MemPool(int type = 0);
+        MemPool(MemPoolType type = default_Mp);
         virtual ~MemPool();
 
         AllocPack* Alloc(int size);
