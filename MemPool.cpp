@@ -210,7 +210,7 @@ namespace CommLib {
     AllocPack* MemPool::Alloc(int size) {
         AllocPack* pPack = NULL;
 
-        int ind = hash(size);
+        int ind = hashbit(size);
         if (-1 == ind)
             return pPack;
 
@@ -218,7 +218,7 @@ namespace CommLib {
     }
 
     void MemPool::Free(AllocPack* pPack) {
-        int ind = hash(pPack->getsize());
+        int ind = hashbit(pPack->getsize());
         if (-1 == ind)
             return;
 
@@ -271,7 +271,6 @@ namespace CommLib {
                 break;
         }
 
-        return -1;
         return i;
     }
 }
