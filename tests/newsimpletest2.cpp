@@ -17,7 +17,7 @@
 using namespace CommLib;
 
 void threadFun( boost::shared_ptr<MemPool> mp) {
-    std::cout << "this thread:" << pthread_self() << std::endl;
+  //  std::cout << "this thread:" << pthread_self() << std::endl;
     //    return;
     srand(10000);
     for (int i = 1; i < 1000; i += 1) {
@@ -38,7 +38,7 @@ int main() {
     gettimeofday(&tm,NULL);
     std::cout<<"m:"<<tm.tv_sec<<" hm"<< tm.tv_usec <<std::endl;
 
-    boost::shared_ptr<MemPool> mp(new MemPool(1));
+    boost::shared_ptr<MemPool> mp(new MemPool(100));
     
 //    typedef boost::function<void () > MyFun;
 //    MyFun func = boost::bind(&threadFun, mp);

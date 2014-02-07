@@ -49,7 +49,7 @@ void threadFun( boost::shared_ptr<MemPool> mp) {
 
 
 int main() {
-    boost::shared_ptr<MemPool> mp(new MemPool());
+    boost::shared_ptr<MemPool> mp(new MemPool(100));
     
     typedef boost::function<void () > MyFun;
     MyFun func = boost::bind(&threadFun, mp);

@@ -148,6 +148,14 @@ namespace CommLib {
         os << " free:" << PackFreeList_.size() << std::endl;
     }
 
+    AllocPackList3::AllocPackList3(int ind)
+    : AllocPackList(ind) {
+        pPackList = NULL;
+    }
+
+    AllocPackList3::~AllocPackList3() {
+    }
+
     MemPool::MemPool(int type) {
         VectSize_ = MAX_SIZE - MIN_SIZE + 1;
 
@@ -156,8 +164,10 @@ namespace CommLib {
         for (int i = 0; i < VectSize_; i++) {
             if (0 == type)
                 AllocPackListVec_[i] = new AllocPackList(i);
-            else
+            else if( 1== type)
                 AllocPackListVec_[i] = new AllocPackList2(i);
+            else
+                AllocPackListVec_[i] = new AllocPackList3(i);
         }
     }
 

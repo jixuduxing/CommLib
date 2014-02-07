@@ -27,7 +27,7 @@ namespace CommLib {
         int getlengh();
         int getsize();
 
-        void reset();
+        virtual void reset();
         void release();
 
         void SetLength(int len);
@@ -39,7 +39,7 @@ namespace CommLib {
         AllocPack(int size, AllocPackList* palloc);
         ~AllocPack();
 
-    private:
+    protected:
         int len_;
         char *buff_;
         int size_;
@@ -50,6 +50,79 @@ namespace CommLib {
         bool Append(T n);
     };
 
+    class AllocPack2 : public AllocPack {
+    public:
+        AllocPack2* next_;
+        friend class AllocPackList3;
+    protected:
+        virtual void reset()
+        {
+            next_ = NULL;
+            AllocPack::reset();
+        }
+        AllocPack2(int size, AllocPackList* palloc)
+                :AllocPack( size,palloc)
+        {
+            next_ = NULL;
+        }
+        ~AllocPack2();
+    };
+    
+    template<typename T>
+    class SimpleList
+    {
+        
+    public:
+        SimpleList()
+        {
+            head_ = NULL;
+            tail_ = NULL;
+            size_ = 0;
+        }
+        
+        ~SimpleList()
+        {
+        }
+        
+        void AddTail(T* node)
+        {
+            if( tail_ )
+            {
+                tail_->next_ = node;
+                tail_ = node;
+            }
+            else
+                head_ = tail_ = node;
+            
+            size_ ++;
+        }
+        
+        T* RemoveHead()
+        {
+            T* temp = head_;
+            if( temp )
+            {
+                head_ = temp->next_;
+                size_ --;
+                if( 0 == size_ )
+                {
+                    tail_ = NULL;
+                }
+            }
+            
+            return temp;
+        }
+        
+        int size()
+        {
+            return size_;
+        }
+    private:
+        T* head_;
+        T* tail_;
+        int size_;
+    };
+    
     //
     // Min Size:7 Bytes
 #define MIN_SIZE 3
@@ -58,7 +131,7 @@ namespace CommLib {
 #define MAX_SIZE 25
 
     class MemPool;
-
+    
     class AllocPackList : boost::noncopyable {
     public:
         AllocPackList(int ind);
@@ -94,10 +167,69 @@ namespace CommLib {
         std::list<AllocPack*> PackUsingList_;
 
     };
+    
+    class AllocPackList3 : public AllocPackList {
+    public:
+        AllocPackList3(int ind);
+        virtual ~AllocPackList3();
+
+        virtual void PrintfSelf(std::ostream& os)
+        {
+            CAutoLock al(lock_);
+            os << " free:" << PackList.size() << std::endl;
+        }
+        virtual AllocPack* Alloc( )
+        {
+            CAutoLock al(lock_);
+            AllocPack* pPack = NULL;
+            pPack = PackList.RemoveHead();
+            if( !pPack )
+                pPack = new AllocPack2( buffsize_,this );
+//            if( NULL != pPackList )
+//            {
+//                pPack = pPackList;
+//                pPackList = pPackList->next_;
+//            }
+//            else
+//            {
+//                pPack = new AllocPack2( buffsize_,this );
+//            }
+            
+            return pPack;
+        }
+        
+        virtual void Free(AllocPack* pPack)
+        {
+            CAutoLock al(lock_);
+
+            pPack->reset();
+            PackList.AddTail( (AllocPack2*)pPack );
+            
+//            AllocPack2* temp = NULL;
+//            
+//            if( pPackList )
+//            {
+//                temp = pPackList;
+//                while( temp->next_ )
+//                {
+//                    temp = temp->next_;
+//                }
+//                temp->next_ =  (AllocPack2*)pPack;
+//            }
+//            else
+//                pPackList =  (AllocPack2*)pPack;
+            
+//            pPackList->next_ = (AllocPack2*)pPack;
+        }
+    private:
+        AllocPack2* pPackList;
+        
+        SimpleList<AllocPack2> PackList;
+    };
 
     class MemPool : boost::noncopyable {
     public:
-        static MemPool* defaultMp()
+        static MemPool* defaultMp( )
         {
             static MemPool* defmp = new MemPool();
             return defmp;
