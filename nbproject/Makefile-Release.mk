@@ -163,7 +163,7 @@ ${TESTDIR}/TestFiles/f8: ${TESTDIR}/tests/BoostMemPoolTest.o ${OBJECTFILES:%.o=%
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f8 $^ ${LDLIBSOPTIONS} 
 
-${TESTDIR}/TestFiles/f3: ${TESTDIR}/tests/newsimpletest2.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/f3: ${TESTDIR}/tests/defaultMemTest.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f3 $^ ${LDLIBSOPTIONS} 
 
@@ -198,10 +198,10 @@ ${TESTDIR}/tests/BoostMemPoolTest.o: tests/BoostMemPoolTest.cpp
 	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/BoostMemPoolTest.o tests/BoostMemPoolTest.cpp
 
 
-${TESTDIR}/tests/newsimpletest2.o: tests/newsimpletest2.cpp 
+${TESTDIR}/tests/defaultMemTest.o: tests/defaultMemTest.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest2.o tests/newsimpletest2.cpp
+	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/defaultMemTest.o tests/defaultMemTest.cpp
 
 
 ${TESTDIR}/tests/newsimpletest5.o: tests/newsimpletest5.cpp 

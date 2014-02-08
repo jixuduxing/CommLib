@@ -21,7 +21,7 @@
                      displayName="MemPoolTest"
                      projectFiles="true"
                      kind="TEST">
-        <itemPath>tests/newsimpletest2.cpp</itemPath>
+        <itemPath>tests/defaultMemTest.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f6"
                      displayName="TestCopyable"
@@ -298,7 +298,7 @@
           </incDir>
         </ccTool>
         <linkerTool>
-          <output>${TESTDIR}/TestFiles/f8</output>
+          <output>${TESTDIR}/TestFiles/BoostMemPoolTest</output>
           <linkerLibItems>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
           </linkerLibItems>
@@ -313,9 +313,9 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="tests/newsimpletest.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/defaultMemTest.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="tests/newsimpletest2.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/newsimpletest.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/newsimpletest3.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -532,9 +532,9 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="tests/newsimpletest.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/defaultMemTest.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="tests/newsimpletest2.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/newsimpletest.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/newsimpletest3.cpp" ex="false" tool="1" flavor2="0">
       </item>

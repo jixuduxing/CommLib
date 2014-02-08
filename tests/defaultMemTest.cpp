@@ -27,7 +27,8 @@ void threadFun(boost::shared_ptr<MemPool> mp) {
         //        int count = rand()%10000000000;
         int count = i;
         char* buff = new char[i];
-
+//        delete buff;
+        
         {
             CAutoLock lock(lock_);
             m_dynamiclist.push_back((void*) buff);
@@ -61,10 +62,10 @@ int main() {
     //    MyFun func = boost::bind(&threadFun, mp);
     ThreadPool thrpool;
 
-    thrpool.Init(10);
+    thrpool.Init(99);
     sleep(1);
 
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10000; i++)
         thrpool.AddTask(boost::bind(&threadFun, mp));
 
     thrpool.Stop();

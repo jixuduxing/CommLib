@@ -54,7 +54,7 @@ TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
 
 # Test Files
 TESTFILES= \
-	${TESTDIR}/TestFiles/f8 \
+	${TESTDIR}/TestFiles/BoostMemPoolTest \
 	${TESTDIR}/TestFiles/MemPoolTest \
 	${TESTDIR}/TestFiles/TestCopyable \
 	${TESTDIR}/TestFiles/TestCTime \
@@ -159,11 +159,11 @@ ${OBJECTDIR}/TimeSpan.o: TimeSpan.cpp
 
 # Build Test Targets
 .build-tests-conf: .build-conf ${TESTFILES}
-${TESTDIR}/TestFiles/f8: ${TESTDIR}/tests/BoostMemPoolTest.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/BoostMemPoolTest: ${TESTDIR}/tests/BoostMemPoolTest.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc}   -o ${TESTDIR}/TestFiles/f8 $^ ${LDLIBSOPTIONS} -lpthread 
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/BoostMemPoolTest $^ ${LDLIBSOPTIONS} -lpthread 
 
-${TESTDIR}/TestFiles/MemPoolTest: ${TESTDIR}/tests/newsimpletest2.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/MemPoolTest: ${TESTDIR}/tests/defaultMemTest.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/MemPoolTest $^ ${LDLIBSOPTIONS} -lpthread 
 
@@ -198,10 +198,10 @@ ${TESTDIR}/tests/BoostMemPoolTest.o: tests/BoostMemPoolTest.cpp
 	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/BoostMemPoolTest.o tests/BoostMemPoolTest.cpp
 
 
-${TESTDIR}/tests/newsimpletest2.o: tests/newsimpletest2.cpp 
+${TESTDIR}/tests/defaultMemTest.o: tests/defaultMemTest.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest2.o tests/newsimpletest2.cpp
+	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/defaultMemTest.o tests/defaultMemTest.cpp
 
 
 ${TESTDIR}/tests/newsimpletest5.o: tests/newsimpletest5.cpp 
@@ -413,7 +413,7 @@ ${OBJECTDIR}/TimeSpan_nomain.o: ${OBJECTDIR}/TimeSpan.o TimeSpan.cpp
 .test-conf:
 	@if [ "${TEST}" = "" ]; \
 	then  \
-	    ${TESTDIR}/TestFiles/f8 || true; \
+	    ${TESTDIR}/TestFiles/BoostMemPoolTest || true; \
 	    ${TESTDIR}/TestFiles/MemPoolTest || true; \
 	    ${TESTDIR}/TestFiles/TestCopyable || true; \
 	    ${TESTDIR}/TestFiles/TestCTime || true; \
