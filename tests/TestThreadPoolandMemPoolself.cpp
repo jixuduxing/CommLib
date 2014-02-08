@@ -14,36 +14,43 @@
 #include "../ThreadPool.h"
 #include "../MemPool.h"
 
-using namespace CommLib;
-
 std::list<void*> m_dynamiclist;
-CMutexLock lock_;
 
+
+using namespace CommLib;
+CMutexLock lock_;
 void threadFun(boost::shared_ptr<MemPool> mp) {
-    //  std::cout << "this thread:" << pthread_self() << std::endl;
+    //   std::cout << "this thread:" << pthread_self() << std::endl;
     //    return;
     srand(10000);
     for (int i = 1; i < 10000; i += 1) {
         //        int count = rand()%10000000000;
         int count = i;
-        char* buff = new char[i];
+        AllocPack* pPack = mp->Alloc(count);
 
         {
             CAutoLock lock(lock_);
-            m_dynamiclist.push_back((void*) buff);
-            if (buff && (m_dynamiclist.size() > 1000)) {
+            m_dynamiclist.push_back((void*) pPack);
+            if (pPack && (m_dynamiclist.size() > 1000)) {
                 {
                     std::list<void*>::iterator it = m_dynamiclist.begin();
                     for (size_t i = 0; i < 600; i++) {
-                        buff = (char*) (*it);
-                        delete buff;
+                        pPack = (AllocPack*) (*it);
+//                        mp->Free(pPack );
+                        pPack->release();
 
                         it = m_dynamiclist.erase(it);
                     }
                 }
             }
+            //            pPack->release();
+            //            if (i % 127) {
+            //                mp->free(pPack);
         }
-
+        //        } else {
+        //            std::cout << "over" << std::endl;
+        //            break;
+        //        }
     }
     //   mp->printfself(std::cout);
 }

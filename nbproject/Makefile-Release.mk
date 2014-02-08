@@ -54,6 +54,7 @@ TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
 
 # Test Files
 TESTFILES= \
+	${TESTDIR}/TestFiles/f8 \
 	${TESTDIR}/TestFiles/f3 \
 	${TESTDIR}/TestFiles/f6 \
 	${TESTDIR}/TestFiles/f4 \
@@ -158,6 +159,10 @@ ${OBJECTDIR}/TimeSpan.o: TimeSpan.cpp
 
 # Build Test Targets
 .build-tests-conf: .build-conf ${TESTFILES}
+${TESTDIR}/TestFiles/f8: ${TESTDIR}/tests/BoostMemPoolTest.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f8 $^ ${LDLIBSOPTIONS} 
+
 ${TESTDIR}/TestFiles/f3: ${TESTDIR}/tests/newsimpletest2.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f3 $^ ${LDLIBSOPTIONS} 
@@ -182,9 +187,15 @@ ${TESTDIR}/TestFiles/f5: ${TESTDIR}/tests/newsimpletest4.o ${OBJECTFILES:%.o=%_n
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f5 $^ ${LDLIBSOPTIONS} 
 
-${TESTDIR}/TestFiles/f2: ${TESTDIR}/tests/newsimpletest1.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/f2: ${TESTDIR}/tests/TestThreadPoolandMemPoolself.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS} -lcunit 
+
+
+${TESTDIR}/tests/BoostMemPoolTest.o: tests/BoostMemPoolTest.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/BoostMemPoolTest.o tests/BoostMemPoolTest.cpp
 
 
 ${TESTDIR}/tests/newsimpletest2.o: tests/newsimpletest2.cpp 
@@ -223,10 +234,10 @@ ${TESTDIR}/tests/newsimpletest4.o: tests/newsimpletest4.cpp
 	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest4.o tests/newsimpletest4.cpp
 
 
-${TESTDIR}/tests/newsimpletest1.o: tests/newsimpletest1.cpp 
+${TESTDIR}/tests/TestThreadPoolandMemPoolself.o: tests/TestThreadPoolandMemPoolself.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest1.o tests/newsimpletest1.cpp
+	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/TestThreadPoolandMemPoolself.o tests/TestThreadPoolandMemPoolself.cpp
 
 
 ${OBJECTDIR}/Epoll_nomain.o: ${OBJECTDIR}/Epoll.o Epoll.cpp 
@@ -402,6 +413,7 @@ ${OBJECTDIR}/TimeSpan_nomain.o: ${OBJECTDIR}/TimeSpan.o TimeSpan.cpp
 .test-conf:
 	@if [ "${TEST}" = "" ]; \
 	then  \
+	    ${TESTDIR}/TestFiles/f8 || true; \
 	    ${TESTDIR}/TestFiles/f3 || true; \
 	    ${TESTDIR}/TestFiles/f6 || true; \
 	    ${TESTDIR}/TestFiles/f4 || true; \

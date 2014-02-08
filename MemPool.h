@@ -15,56 +15,51 @@
 #include <list>
 #include <deque>
 
+#include <boost/pool/pool.hpp>
+#include <boost/pool/poolfwd.hpp>
+#include <boost/pool/singleton_pool.hpp>
+
 #include "Lock.h"
 
 namespace CommLib {
-    
+
     template<typename T>
-    class SimpleList
-    {
+    class SimpleList {
     public:
-        SimpleList()
-        {
+
+        SimpleList() {
             head_ = NULL;
             tail_ = NULL;
             size_ = 0;
         }
-        
-        ~SimpleList()
-        {
+
+        ~SimpleList() {
         }
-        
-        void AddTail(T* node)
-        {
-            if( tail_ )
-            {
+
+        void AddTail(T* node) {
+            if (tail_) {
                 tail_->next_ = node;
                 tail_ = node;
-            }
-            else
+            } else
                 head_ = tail_ = node;
-            
-            size_ ++;
+
+            size_++;
         }
-        
-        T* RemoveHead()
-        {
+
+        T* RemoveHead() {
             T* temp = head_;
-            if( temp )
-            {
+            if (temp) {
                 head_ = temp->next_;
-                size_ --;
-                if( 0 == size_ )
-                {
+                size_--;
+                if (0 == size_) {
                     tail_ = NULL;
                 }
             }
-            
+
             return temp;
         }
-        
-        int size()
-        {
+
+        int size() {
             return size_;
         }
     private:
@@ -72,7 +67,7 @@ namespace CommLib {
         T* tail_;
         int size_;
     };
-    
+
     class AllocPackList;
 
     class AllocPack : boost::noncopyable {
@@ -89,6 +84,7 @@ namespace CommLib {
     protected:
         friend class AllocPackList;
         friend class AllocPackList2;
+        friend class AllocPackListBoost;
 
         AllocPackList* pAllocList_;
         AllocPack(int size, AllocPackList* palloc);
@@ -106,25 +102,26 @@ namespace CommLib {
     };
 
     //include the ptr point to the next
+
     class AllocPack2 : public AllocPack {
     protected:
         AllocPack2* next_;
         friend class SimpleList<AllocPack2>;
         friend class AllocPackListSimple;
-        
+
     protected:
-        virtual void reset()
-        {
+
+        virtual void reset() {
             next_ = NULL;
             AllocPack::reset();
         }
+
         AllocPack2(int size, AllocPackList* palloc)
-                :AllocPack( size,palloc)
-        {
+        : AllocPack(size, palloc) {
             next_ = NULL;
         }
     };
-    
+
     //
     // Min Size:7 Bytes
 #define MIN_SIZE 3
@@ -133,7 +130,7 @@ namespace CommLib {
 #define MAX_SIZE 25
 
     class MemPool;
-    
+
     class AllocPackList : boost::noncopyable {
     public:
         AllocPackList(int ind);
@@ -156,6 +153,7 @@ namespace CommLib {
     };
 
     //care the mem using
+
     class AllocPackList2 : public AllocPackList {
     public:
         AllocPackList2(int ind);
@@ -166,38 +164,58 @@ namespace CommLib {
         virtual void PrintfSelf(std::ostream& os);
     private:
         std::list<AllocPack*> PackUsingList_;
+
+
     };
-    
+
     //using SimpleList Writen by self
+
     class AllocPackListSimple : public AllocPackList {
     public:
         AllocPackListSimple(int ind);
         virtual ~AllocPackListSimple();
 
         virtual void PrintfSelf(std::ostream& os);
-        
-        virtual AllocPack* Alloc( );
-        
+
+        virtual AllocPack* Alloc();
+
         virtual void Free(AllocPack* pPack);
     private:
         SimpleList<AllocPack2> PackList;
+        //        boost::pool<boost::default_user_allocator_new_delete> testpool;
+    };
+
+    //using boost memPool
+
+    class AllocPackListBoost : public AllocPackList {
+    public:
+        AllocPackListBoost(int ind);
+        virtual ~AllocPackListBoost();
+
+        virtual void PrintfSelf(std::ostream& os);
+
+        virtual AllocPack* Alloc();
+
+        virtual void Free(AllocPack* pPack);
+    private:
+        boost::pool<boost::default_user_allocator_new_delete> boostPackpool_;
     };
 
     class MemPool : boost::noncopyable {
     public:
-        enum MemPoolType
-        {
-            default_Mp,         //using deque
-            careusing_Mp,    //care memory using
-            SimpleList_Mp,    //using the list self
+
+        enum MemPoolType {
+            default_Mp, //using deque
+            careusing_Mp, //care memory using
+            SimpleList_Mp, //using the list self
+            Boost_Mp,   // using boost mempool to hash MemPool
         };
-        
-        static MemPool* defaultMp( )
-        {
+
+        static MemPool* defaultMp() {
             static MemPool* defmp = new MemPool();
             return defmp;
         }
-        
+
         //default 0,no care the mem using,else care
         MemPool(MemPoolType type = default_Mp);
         virtual ~MemPool();

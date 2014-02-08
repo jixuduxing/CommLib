@@ -149,7 +149,9 @@ namespace CommLib {
     }
 
     AllocPackListSimple::AllocPackListSimple(int ind)
-    : AllocPackList(ind) {
+    : AllocPackList(ind)
+    //    ,testpool( (1 << (ind + MIN_SIZE)) - 1 )
+    {
     }
 
     AllocPackListSimple::~AllocPackListSimple() {
@@ -166,6 +168,11 @@ namespace CommLib {
 
     AllocPack* AllocPackListSimple::Alloc() {
         AllocPack* pPack = NULL;
+        //        {
+        //            CAutoLock al(lock_);
+        //            pPack = ( AllocPack* )testpool.malloc();
+        //            return pPack;
+        //        }
         {
             CAutoLock al(lock_);
             pPack = PackList.RemoveHead();
@@ -180,7 +187,39 @@ namespace CommLib {
         pPack->reset();
 
         CAutoLock al(lock_);
+        //        testpool.free((void*)pPack );
+        //        return;
         PackList.AddTail((AllocPack2*) pPack);
+    }
+
+    AllocPackListBoost::AllocPackListBoost(int ind)
+    : AllocPackList(ind), boostPackpool_((1 << (ind + MIN_SIZE)) - 1 + sizeof (AllocPack)) {
+    }
+
+    AllocPackListBoost::~AllocPackListBoost() {
+    }
+
+    void AllocPackListBoost::PrintfSelf(std::ostream& os) {
+        CAutoLock al(lock_);
+        //        os << " free:" << testpool. << std::endl;
+    }
+
+    AllocPack* AllocPackListBoost::Alloc() {
+        AllocPack* pPack = NULL;
+        CAutoLock al(lock_);
+        pPack = (AllocPack*) boostPackpool_.malloc();
+        pPack->size_ = buffsize_;
+        pPack->len_ = 0;
+        pPack->pAllocList_  = this;
+        pPack->buff_ = ( (char*)pPack + sizeof(AllocPack) );
+
+        return pPack;
+    }
+
+    void AllocPackListBoost::Free(AllocPack* pPack) {
+        CAutoLock al(lock_);
+        boostPackpool_.free((void*) pPack);
+        return;
     }
 
     MemPool::MemPool(MemPoolType type) {
@@ -193,6 +232,8 @@ namespace CommLib {
                 AllocPackListVec_[i] = new AllocPackList(i);
             else if (careusing_Mp == type)
                 AllocPackListVec_[i] = new AllocPackList2(i);
+            else if (Boost_Mp == type)
+                AllocPackListVec_[i] = new AllocPackListBoost(i);
             else
                 AllocPackListVec_[i] = new AllocPackListSimple(i);
         }
