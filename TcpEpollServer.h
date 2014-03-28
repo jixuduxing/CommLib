@@ -10,7 +10,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
-#include <list>
 
 #include "Thread.h"
 #include "MemPool.h"
@@ -19,14 +18,14 @@
 
 namespace CommLib {
 
-    template<class ClientType>
-    class TcpEpollServer :  public Thread, public TcpServSock {
+    //    template<class ClientType>
+
+    class TcpEpollServer : public Thread, public TcpServSock {
     public:
 
         TcpEpollServer(
-                boost::shared_ptr<Epoll> epoll,
-                boost::shared_ptr<MemPool> mempool)
-        : Epoll_(epoll), Mempool_(mempool), bStarted_(false),
+                boost::shared_ptr<Epoll> epoll)
+        : Epoll_(epoll), bStarted_(false),
         Thread("TcpEpollServer", boost::bind(&TcpEpollServer::Schedule, this)) {
         }
 
@@ -52,7 +51,7 @@ namespace CommLib {
                 return false;
             }
 
-            assert ( 0 == Epoll_->epollAdd( this, Epoll::EVENT_READ ) );
+            assert(0 == Epoll_->epollAdd(this, Epoll::EVENT_READ));
             this->Setnonblocking();
 
             StartThread();
@@ -60,7 +59,7 @@ namespace CommLib {
 
         bool Stop() {
 
-//            Epoll_->Close();
+            //            Epoll_->Close();
             if (!bStarted_)
                 return false;
             bStarted_ = false;
@@ -84,26 +83,32 @@ namespace CommLib {
             }
 
             boost::shared_ptr<TcpSock> sock(MakeNewClient(socket));
-            SockAddr skAddr( addr);
+            SockAddr skAddr(addr);
 
-            sock->Setnonblocking();            
-            assert ( 0 == Epoll_->epollAdd( sock.get(), Epoll::EVENT_READ ) );
-            sock->SetRemoteAddr( skAddr );
-            ClientList_.push_back(sock);
+            sock->Setnonblocking();
+            assert(0 == Epoll_->epollAdd(sock.get(), Epoll::EVENT_READ));
+            sock->SetRemoteAddr(skAddr);
 
             return 1;
         }
 
-        ClientType* MakeNewClient(int socket) {
-            return new ClientType(socket);
-        }
+        virtual boost::shared_ptr<TcpSock> MakeNewClient(int socket) =0;
+        
+        virtual void OnAddClient(boost::shared_ptr<TcpSock> sock)
+        {
+        };
 
+        
+        virtual void RemoveClient(boost::shared_ptr<TcpSock> sock)
+        {
+            Epoll_->epollDel(sock.get() );
+        }
     private:
         bool bStarted_;
         boost::shared_ptr<Epoll> Epoll_;
-        boost::shared_ptr<MemPool> Mempool_;
+        //        boost::shared_ptr<MemPool> Mempool_;
 
-        std::list<boost::shared_ptr<TcpSock> > ClientList_;
+        
     };
 }
 
