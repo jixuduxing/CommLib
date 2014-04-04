@@ -9,107 +9,81 @@
 #define	TCPEPOOLSERVER_H
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
 
 #include "Thread.h"
 #include "MemPool.h"
 #include "Epoll.h"
 #include "TcpSock.h"
+#include "Time.h"
 
 namespace CommLib {
 
     //    template<class ClientType>
 
-    class TcpEpollServer : public Thread, public TcpServSock {
+    class TcpEpollServerImp;
+
+    class TcpEpollSockImp : public TcpSock, public boost::enable_shared_from_this<TcpEpollSockImp> {
     public:
 
-        TcpEpollServer(
-                boost::shared_ptr<Epoll> epoll)
-        : Epoll_(epoll), bStarted_(false),
-        Thread("TcpEpollServer", boost::bind(&TcpEpollServer::Schedule, this)) {
+        TcpEpollSockImp(int sock
+                , TcpEpollServerImp* pEServ
+                );
+
+
+    public:
+        bool CheckValid();
+
+        inline void SetLastRecvTime() {
+            LastRecvTime_ = Time::GetCurrentTime();
+        };
+    private:
+
+        int OnSend();
+        int OnClose();
+
+    private:
+        Time LastRecvTime_;
+        TimeSpan TimeOut_;
+        TcpEpollServerImp* pEServ_;
+    };
+
+    class TcpEpollServerImp : public Thread, public TcpServImp {
+    public:
+
+        TcpEpollServerImp(
+                boost::shared_ptr<Epoll> epoll);
+
+        virtual ~TcpEpollServerImp() {
         }
 
-        virtual ~TcpEpollServer() {
-        }
-
-        typedef std::list<boost::shared_ptr<TcpSock> >::iterator pClientList;
-
-        bool Start(int nPort) {
-            if (bStarted_)
-                return false;
-            bStarted_ = true;
-
-            SockAddr addr(nPort, "0.0.0.0", Sock::IP);
-
-            if (-1 == Bind(addr)) {
-                perror("TcpEpollServer::Start false");
-                return false;
-            }
-
-            if (-1 == Listen(10)) {
-                perror("TcpEpollServer::Start false");
-                return false;
-            }
-
-            assert(0 == Epoll_->epollAdd(this, Epoll::EVENT_READ));
-            this->Setnonblocking();
-
-            StartThread();
-        }
-
-        bool Stop() {
-
-            //            Epoll_->Close();
-            if (!bStarted_)
-                return false;
-            bStarted_ = false;
-
-            Join();
-        }
-
-        bool Schedule() {
-            while (Epoll_->Schedule(10));
-            return true;
-        }
+    public:
+        bool Start(int nPort);
+        bool Stop();
 
         //         
+    private:
+        int OnAccept();
+        int OnSend();
+        int OnClose();
 
-        virtual int OnAccept() {
-            sockaddr_in addr;
-            socklen_t addrlen = sizeof (sockaddr_in);
-            int socket = accept(Getsock(), (struct sockaddr *) &addr, &addrlen);
-            if (socket < 0) {
-                return 0;
-            }
-
-            boost::shared_ptr<TcpSock> sock(MakeNewClient(socket));
-            SockAddr skAddr(addr);
-
-            sock->Setnonblocking();
-            assert(0 == Epoll_->epollAdd(sock.get(), Epoll::EVENT_READ));
-            sock->SetRemoteAddr(skAddr);
-
-            return 1;
-        }
-
-        virtual boost::shared_ptr<TcpSock> MakeNewClient(int socket) =0;
+        bool Schedule();
+        void RemoveClient(boost::shared_ptr<TcpEpollSockImp> sock);
         
-        virtual void OnAddClient(boost::shared_ptr<TcpSock> sock)
-        {
-        };
+    private:
+        virtual boost::shared_ptr<TcpEpollSockImp> MakeNewClient(int socket) = 0;
 
-        
-        virtual void RemoveClient(boost::shared_ptr<TcpSock> sock)
-        {
-            Epoll_->epollDel(sock.get() );
-        }
+        virtual void OnAddClient(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
+
+        virtual void OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
+
     private:
         bool bStarted_;
         boost::shared_ptr<Epoll> Epoll_;
-        //        boost::shared_ptr<MemPool> Mempool_;
 
-        
     };
+
 }
 
 #endif	/* TCPEPOOLSERVER_H */

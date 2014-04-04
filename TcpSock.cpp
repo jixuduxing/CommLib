@@ -1,9 +1,10 @@
-/* 
+/*
  * File:   TcpSock.cpp
  * Author: Administrator
- * 
+ *
  * Created on 2014年1月28日, 上午10:17
  */
+#include <assert.h>
 
 #include "TcpSock.h"
 #include "Epoll.h"
@@ -66,16 +67,22 @@ namespace CommLib {
     //        return 1;
     //    }
 
-    int TcpServSock::OnRecv() {
+    int TcpServImp::OnRecv() {
         return OnAccept();
     }
 
-    int TcpServSock::OnSend() {
-        return 0;
-    }
 
-    int TcpServSock::OnClose() {
-        Close();
-        return 0;
+
+    bool TcpClientSock::InitConnect(char* szIp,int nPort)
+    {
+      SockAddr addr(nPort, szIp, Sock::IP);
+      if( -1 == Connect(addr) )
+        return false;
+
+//      assert(0 == Epoll_->epollAdd(this, Epoll::EVENT_READ));
+      this->Setnonblocking();
+
+      return true;
     }
+    
 }

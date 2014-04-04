@@ -15,7 +15,7 @@
 #include "../Parser.h"
 #include "../Epoll.h"
 #include "../MemPool.h"
-#include "../TcpEpollServer.h"
+#include "../CommServer.h"
 #include "../Time.h"
 
 /*
@@ -52,134 +52,40 @@ void test1() {
     std::cout << " end " << std::endl;
 }
 
-class MyTcpEpollServer;
+
 //在该类中做计时、超时处理
 
-class MyTcpSock : public CommLib::TcpSock, public boost::enable_shared_from_this<MyTcpSock> {
+class MyTcpSock : public CommLib::CommSockImp {
 public:
 
-    MyTcpSock(int sock, boost::shared_ptr<CommLib::MemPool> pMemPool, MyTcpEpollServer* pEServ) :
-    CommLib::TcpSock(sock),
-    pMemPool_(pMemPool),
-    pParser_(new TestParser()),
-    pEServ_(pEServ) {
-    }
-
-    //    MyTcpSock()
-    //    {
-    //        pParser_ = new TestParser();
-    //    }
-
-    virtual int OnRecv() {
-        using namespace CommLib;
-
-        LastRecvTime_ = CommLib::Time::GetCurrentTime();
-        AllocPack* pack = pMemPool_->Alloc(1024);
-        if (pack) {
-            int len = Recv((void*) pack->getbuffer(), pack->getsize());
-
-            if (len > 0) {
-                pack->SetLength(len);
-                pParser_->parse((char*) pack->getbuffer(), pack->getlengh());
-            }
-            this->Send( (char*) pack->getbuffer(), pack->getlengh() );
-            pack->release();
-
-            return len;
-        }
-        return -1;
+    MyTcpSock(int sock, boost::shared_ptr<CommLib::MemPool> pMemPool, CommLib::TcpEpollServerImp* pEServ) :
+    CommLib::CommSockImp(sock, pMemPool, pEServ),
+    pParser_(new TestParser()) {
     }
 
     virtual int OnSend() {
-        return 0;
-    }
+        return 1;
+    };
 
-    virtual int OnClose();
+    virtual int OnClose() {
+        return 1;
+    };
 
-    bool CheckValid() {
-        if (CommLib::Time::GetCurrentTime() - LastRecvTime_ > TimeOut_) {
-            //超时
-            printf("超时\r\n");
-            Close();
-            return false;
-        }
-        
-        return true;
+    virtual int OnRecvPack(CommLib::AllocPack* pack) {
+
+        pParser_->parse((char*) pack->getbuffer(), pack->getlengh());
+        Send((char*) pack->getbuffer(), pack->getlengh());
+
+        return 1;
     }
 
 private:
-    CommLib::Time LastRecvTime_;
-    CommLib::TimeSpan TimeOut_;
-
-    boost::shared_ptr<CommLib::MemPool> pMemPool_;
     boost::shared_ptr<TestParser> pParser_;
-
-    MyTcpEpollServer* pEServ_;
 };
-
-class MyTcpEpollServer : public CommLib::TcpEpollServer {
-public:
-
-    MyTcpEpollServer(
-            boost::shared_ptr<CommLib::Epoll> epoll,
-            boost::shared_ptr<CommLib::MemPool> mempool)
-    : CommLib::TcpEpollServer(epoll), Mempool_(mempool) {
-    }
-
-    virtual boost::shared_ptr<TcpSock> MakeNewClient(int socket) {
-        return boost::shared_ptr<TcpSock>( new MyTcpSock(socket,Mempool_,this) );
-    }
-
-    virtual void OnAddClient(boost::shared_ptr<TcpSock> sock) {
-        CommLib::CAutoLock lock(lock_);
-        ClientList_.push_back(sock);
-    };
-
-    virtual void OnCloseClient(boost::shared_ptr<TcpSock> sock) {
-        CommLib::CAutoLock lock(lock_);
-        std::list<boost::shared_ptr<TcpSock> >::iterator iter = ClientList_.begin();
-        for (; iter != ClientList_.end(); iter++) {
-            if (sock == *iter)
-                ClientList_.erase(iter);
-        }
-    };
-
-    void Check()
-    {
-        CommLib::CAutoLock lock(lock_);
-         std::list<boost::shared_ptr<TcpSock> >::iterator iter = ClientList_.begin();
-        for (; iter != ClientList_.end(); ) {
-            boost::shared_ptr<MyTcpSock> psock = boost::dynamic_pointer_cast<MyTcpSock>( *iter);
-            if( psock )
-            {
-                if( !psock->CheckValid() )
-                {
-                    RemoveClient(psock);
-                    ClientList_.erase(iter++ );
-                    continue;
-                }
-            }
-            iter++;
-        }
-    }
-    
-    boost::shared_ptr<CommLib::MemPool> Mempool_;
-
-    CommLib::CMutexLock lock_;
-    std::list<boost::shared_ptr<TcpSock> > ClientList_;
-};
-
-int MyTcpSock::OnClose()
- {
-        Close();
-
-        pEServ_->OnCloseClient(shared_from_this());
-        return 0;
-    }
 
 void test2() {
 
-    MyTcpEpollServer server(
+    CommLib::CommonServer<MyTcpSock> server(
             boost::shared_ptr<CommLib::Epoll >(new CommLib::EpollSimple()),
             boost::shared_ptr<CommLib::MemPool >(new CommLib::MemPool()));
     server.Start(2080);

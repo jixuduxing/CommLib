@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   TcpSock.h
  * Author: Administrator
  *
@@ -19,24 +19,36 @@ namespace CommLib {
 
         TcpSock();
 
-        TcpSock(int sock) ;
+        TcpSock(int sock);
 
-        ~TcpSock() ;
+        ~TcpSock();
 
     public:
         virtual int Send(void *buf, int nbytes);
         virtual int Recv(void *buf, int nbytes);
     };
 
-    class TcpServSock : public TcpSock {
+    class TcpServImp : public TcpSock {
     public:
 
     public:
-        virtual int OnRecv();
-        virtual int OnSend();
-        virtual int OnClose();
-        
+        int OnRecv();
+
         virtual int OnAccept() = 0;
+
+
+
+    };
+
+    class TcpClientSock : public TcpSock {
+    public:
+
+    public:
+        bool InitConnect(char* szIp, int nPort);
+
+        //        virtual int OnRecv() = 0;
+        //        virtual int OnSend() = 0;
+        //        virtual int OnClose() = 0;
 
     };
 }
