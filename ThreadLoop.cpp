@@ -9,7 +9,7 @@
 namespace CommLib {
 
     ThreadLoop::ThreadLoop(std::string name, int loopTime)
-    : Thread(name, boost::bind(&ThreadLoop::ThreadFunc, this))
+    : Thread( boost::bind(&ThreadLoop::ThreadFunc, this),name)
     , loopTime_(loopTime) {
     }
 

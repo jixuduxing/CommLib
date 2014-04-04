@@ -36,7 +36,7 @@ namespace CommLib {
 
     class Thread : boost::noncopyable {
     public:
-        Thread(std::string name, boost::function<void () > func);
+        Thread( boost::function<void () > func,std::string name="");
         virtual ~Thread();
 
         void StartThread();

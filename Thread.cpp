@@ -8,7 +8,7 @@
 #include "Thread.h"
 namespace CommLib {
 
-    Thread::Thread(std::string name, boost::function<void () > func)
+    Thread::Thread( boost::function<void () > func,std::string name )
     : ThrData_(name, func) {
     }
 

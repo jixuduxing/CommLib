@@ -54,10 +54,10 @@ int main() {
     typedef boost::function<void () > MyFun;
     MyFun func = boost::bind(&threadFun, mp);
 
-    Thread thr1("1",func);
-    Thread thr2("2",func);
-    Thread thr3("3",func);
-    Thread thr4("4",func);
+    Thread thr1(func,"1");
+    Thread thr2(func,"2");
+    Thread thr3(func,"3");
+    Thread thr4(func,"4");
 
 //    thr1.SetFunc(func);
 //    thr2.SetFunc(func);

@@ -12,6 +12,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
 
+#include "ThreadLoop.h"
 #include "Thread.h"
 #include "MemPool.h"
 #include "Epoll.h"
@@ -31,29 +32,37 @@ namespace CommLib {
                 , TcpEpollServerImp* pEServ
                 );
 
-
     public:
-        bool CheckValid();
+        virtual bool CheckValid() = 0;
 
-        inline void SetLastRecvTime() {
-            LastRecvTime_ = Time::GetCurrentTime();
-        };
     private:
-
         int OnSend();
         int OnClose();
 
     private:
-        Time LastRecvTime_;
-        TimeSpan TimeOut_;
+
         TcpEpollServerImp* pEServ_;
+    };
+
+    class CheckLoop : public ThreadLoop {
+    public:
+
+        CheckLoop(std::string name = "", int loopTime = 3)
+        : ThreadLoop(name, loopTime) {
+        }
+
+        virtual void LoopTask();
+        TcpEpollServerImp* pImp;
     };
 
     class TcpEpollServerImp : public Thread, public TcpServImp {
     public:
 
+
         TcpEpollServerImp(
-                boost::shared_ptr<Epoll> epoll);
+                boost::shared_ptr<Epoll> epoll,
+                std::string thrname = "TcpEpollServerImp",
+                std::string checklpname = "", int looptime = 3);
 
         virtual ~TcpEpollServerImp() {
         }
@@ -62,26 +71,32 @@ namespace CommLib {
         bool Start(int nPort);
         bool Stop();
 
+        virtual void Check() = 0;
+        
+        void RemoveClient(boost::shared_ptr<TcpEpollSockImp> sock);
         //         
     private:
         int OnAccept();
         int OnSend();
         int OnClose();
 
+
         bool Schedule();
-        void RemoveClient(boost::shared_ptr<TcpEpollSockImp> sock);
         
+
     private:
         virtual boost::shared_ptr<TcpEpollSockImp> MakeNewClient(int socket) = 0;
 
         virtual void OnAddClient(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
 
+    public:
         virtual void OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
 
     private:
         bool bStarted_;
         boost::shared_ptr<Epoll> Epoll_;
 
+        CheckLoop checkloop_;
     };
 
 }

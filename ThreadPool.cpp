@@ -63,7 +63,7 @@ bool ThreadPool::Init(int threadCnt) {
         threadvec_.resize(threadCnt);
         bRuning_ = true;
         for (int i = 0; i < threadCnt; i++) {
-            threadvec_[i] = new Thread("", boost::bind(&ThreadPool::ThreadFunc, this));
+            threadvec_[i] = new Thread( boost::bind(&ThreadPool::ThreadFunc, this),"");
             threadvec_[i]->StartThread();
         }
 

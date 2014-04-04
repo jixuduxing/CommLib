@@ -12,22 +12,6 @@
 
 namespace CommLib {
 
-    class CommSockImp : public TcpEpollSockImp {
-    public:
-
-        CommSockImp(int sock, boost::shared_ptr<MemPool> pMemPool
-                , TcpEpollServerImp* pEServ
-                );
-
-    private:
-        virtual int OnRecvPack(AllocPack* pack) = 0;
-
-        int OnRecv();
-
-    private:
-        boost::shared_ptr<MemPool> pMemPool_;
-    };
-
     template<class ClientType>
     class CommonServer : public TcpEpollServerImp {
     public:
@@ -35,7 +19,7 @@ namespace CommLib {
         CommonServer(
                 boost::shared_ptr<Epoll> epoll,
                 boost::shared_ptr<MemPool> mempool)
-        : TcpEpollServerImp(epoll), Mempool_(mempool) {
+        : TcpEpollServerImp(epoll,"CommonServer","check",5), Mempool_(mempool) {
         }
 
         typedef std::list<boost::shared_ptr<TcpEpollSockImp> >::iterator pClientList;
@@ -49,9 +33,7 @@ namespace CommLib {
         virtual void OnAddClient(boost::shared_ptr<TcpEpollSockImp> sock) {
             CAutoLock lock(lock_);
             ClientList_.push_back(sock);
-            
-            sock->OnRecv();
-        };
+        }
 
         virtual void OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock) {
             CAutoLock lock(lock_);
@@ -81,6 +63,29 @@ namespace CommLib {
 
         CMutexLock lock_;
         std::list<boost::shared_ptr<TcpEpollSockImp> > ClientList_;
+    };
+
+    class CommSockImp : public TcpEpollSockImp {
+    public:
+
+        CommSockImp(int sock, boost::shared_ptr<MemPool> pMemPool
+                , TcpEpollServerImp* pEServ
+                );
+
+    private:
+        virtual int OnRecvPack(AllocPack* pack) = 0;
+
+        int OnRecv();
+
+        void SetLastRecvTime();
+
+        bool CheckValid();
+
+    private:
+        boost::shared_ptr<MemPool> pMemPool_;
+
+        Time LastRecvTime_;
+        TimeSpan TimeOut_;
     };
 }
 #endif	/* COMMONSERVER_H */

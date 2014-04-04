@@ -14,18 +14,7 @@ namespace CommLib {
             )
     : TcpSock(sock)
     , pEServ_(pEServ) {
-        LastRecvTime_ = Time::GetCurrentTime();
-    }
 
-    bool TcpEpollSockImp::CheckValid() {
-        if (Time::GetCurrentTime() - LastRecvTime_ > TimeOut_) {
-            //超时
-            printf("超时\r\n");
-            Close();
-            return false;
-        }
-
-        return true;
     }
 
     int TcpEpollSockImp::OnSend() {
@@ -35,15 +24,22 @@ namespace CommLib {
     int TcpEpollSockImp::OnClose() {
         Close();
 
-        //        pEServ_->OnCloseClient(shared_from_this());
+        pEServ_->OnCloseClient(shared_from_this());
         return 0;
     }
 
+    void CheckLoop::LoopTask() {
+        pImp->Check();
+    }
 
     TcpEpollServerImp::TcpEpollServerImp(
-            boost::shared_ptr<Epoll> epoll)
+            boost::shared_ptr<Epoll> epoll,
+            std::string thrname,
+            std::string checklpname, int looptime)
     : Epoll_(epoll), bStarted_(false),
-    Thread("TcpEpollServer", boost::bind(&TcpEpollServerImp::Schedule, this)) {
+    Thread(boost::bind(&TcpEpollServerImp::Schedule, this), thrname),
+    checkloop_(checklpname, looptime) {
+        checkloop_.pImp = this;
     }
 
     bool TcpEpollServerImp::Start(int nPort) {
@@ -67,6 +63,8 @@ namespace CommLib {
         this->Setnonblocking();
 
         StartThread();
+
+        checkloop_.StartThread();
     }
 
     bool TcpEpollServerImp::Stop() {
@@ -77,6 +75,9 @@ namespace CommLib {
         bStarted_ = false;
 
         Join();
+
+        checkloop_.StopLoop();
+        checkloop_.Join();
     }
 
     bool TcpEpollServerImp::Schedule() {

@@ -14,7 +14,7 @@ namespace CommLib {
 
     class ThreadLoop : public Thread {
     public:
-        ThreadLoop(std::string name, int loopTime);
+        ThreadLoop(std::string name ="", int loopTime=3);
         virtual ~ThreadLoop();
 
         virtual void LoopTask() = 0;
