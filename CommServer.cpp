@@ -4,9 +4,11 @@
 namespace CommLib {
 
     CommSockImp::CommSockImp(int sock, boost::shared_ptr<MemPool> pMemPool
-            , TcpEpollServerImp* pEServ
+            , TcpEpollServerImp* pEServ,
+            int timeOut
             )
     : TcpEpollSockImp(sock, pEServ),
+    TimeOut_(timeOut),
     pMemPool_(pMemPool) {
         LastRecvTime_ = Time::GetCurrentTime();
     }
@@ -16,7 +18,8 @@ namespace CommLib {
     };
 
     bool CommSockImp::CheckValid() {
-        if (Time::GetCurrentTime() - LastRecvTime_ > TimeOut_) {
+        Time t = Time::GetCurrentTime();
+        if ( t - LastRecvTime_ > TimeOut_) {
             //超时
             printf("超时\r\n");
             Close();

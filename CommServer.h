@@ -69,7 +69,7 @@ namespace CommLib {
     public:
 
         CommSockImp(int sock, boost::shared_ptr<MemPool> pMemPool
-                , TcpEpollServerImp* pEServ
+                , TcpEpollServerImp* pEServ,int timeOut = 15
                 );
 
     private:

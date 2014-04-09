@@ -59,7 +59,7 @@ class MyTcpSock : public CommLib::CommSockImp {
 public:
 
     MyTcpSock(int sock, boost::shared_ptr<CommLib::MemPool> pMemPool, CommLib::TcpEpollServerImp* pEServ) :
-    CommLib::CommSockImp(sock, pMemPool, pEServ),
+    CommLib::CommSockImp(sock, pMemPool, pEServ,15),
     pParser_(new TestParser()) {
     }
 

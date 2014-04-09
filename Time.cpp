@@ -91,7 +91,7 @@ Time Time::operator -(TimeSpan &span) {
 }
 
 TimeSpan Time::operator -(Time &tm) {
-    return TimeSpan(tt_ + tm.tt_);
+    return TimeSpan(tt_ - tm.tt_);
 }
 
 Time Time::operator +(time_t tt) {
