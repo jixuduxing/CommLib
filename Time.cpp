@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   CTime.cpp
  * Author: Administrator
- * 
+ *
  * Created on 2014年1月26日, 下午4:49
  */
 
@@ -17,16 +17,24 @@ Time::Time(time_t tt) : tt_(tt) {
 Time::Time() : tt_(0) {
 }
 
-Time::Time(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec) {
-    tm _tm;
-    _tm.tm_year = nYear;
-    _tm.tm_mon = nMonth;
-    _tm.tm_yday = nDay;
-    _tm.tm_hour = nHour;
-    _tm.tm_min = nMin;
-    _tm.tm_sec = nSec;
+unsigned long mktime(unsigned int year, unsigned int mon,
+                       unsigned int day, unsigned int hour,
+                       unsigned int min, unsigned int sec) {
+   if (0 >= (int) (mon -= 2)) { /* 1..12 -> 11,12,1..10 */
+     mon += 12; /* Puts Feb last since it has leap day */
+     year -= 1;
+   }
 
-    tt_ = mktime(&_tm);
+   return (((
+     (unsigned long) (year / 4 - year / 100 + year / 400 + 367 * mon / 12 + day) +
+     year * 365 - 719499
+     )*24 + hour /* now have hours */
+     )*60 + min /* now have minutes */
+     )*60 + sec; /* finally seconds */
+}
+
+Time::Time(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec) {
+    tt_ = mktime(nYear,nMonth,nDay,nHour,nMin,nSec)+__timezone;
     localtime_r(&tt_, &tm_);
 
 }

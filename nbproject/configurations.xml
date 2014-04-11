@@ -2,8 +2,37 @@
 <configurationDescriptor version="90">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles" displayName="头文件" projectFiles="true">
+      <itemPath>CommServer.h</itemPath>
+      <itemPath>Epoll.h</itemPath>
+      <itemPath>Lock.h</itemPath>
+      <itemPath>MemPool.h</itemPath>
+      <itemPath>Parser.h</itemPath>
+      <itemPath>Semaphore.h</itemPath>
+      <itemPath>Singleton.h</itemPath>
+      <itemPath>Sock.h</itemPath>
+      <itemPath>TcpEpollServer.h</itemPath>
+      <itemPath>TcpSock.h</itemPath>
+      <itemPath>Thread.h</itemPath>
+      <itemPath>ThreadLoop.h</itemPath>
+      <itemPath>ThreadPool.h</itemPath>
+      <itemPath>Time.h</itemPath>
+      <itemPath>TimeSpan.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles" displayName="源文件" projectFiles="true">
+      <itemPath>CommServer.cpp</itemPath>
+      <itemPath>Epoll.cpp</itemPath>
+      <itemPath>Lock.cpp</itemPath>
+      <itemPath>MemPool.cpp</itemPath>
+      <itemPath>Parser.cpp</itemPath>
+      <itemPath>Semaphore.cpp</itemPath>
+      <itemPath>Sock.cpp</itemPath>
+      <itemPath>TcpEpollServer.cpp</itemPath>
+      <itemPath>TcpSock.cpp</itemPath>
+      <itemPath>Thread.cpp</itemPath>
+      <itemPath>ThreadLoop.cpp</itemPath>
+      <itemPath>ThreadPool.cpp</itemPath>
+      <itemPath>Time.cpp</itemPath>
+      <itemPath>TimeSpan.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles" displayName="资源文件" projectFiles="true">
     </logicalFolder>
@@ -60,33 +89,6 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
-    <itemPath>Epoll.cpp</itemPath>
-    <itemPath>Epoll.h</itemPath>
-    <itemPath>Lock.cpp</itemPath>
-    <itemPath>Lock.h</itemPath>
-    <itemPath>MemPool.cpp</itemPath>
-    <itemPath>MemPool.h</itemPath>
-    <itemPath>Parser.cpp</itemPath>
-    <itemPath>Parser.h</itemPath>
-    <itemPath>Semaphore.cpp</itemPath>
-    <itemPath>Semaphore.h</itemPath>
-    <itemPath>Singleton.h</itemPath>
-    <itemPath>Sock.cpp</itemPath>
-    <itemPath>Sock.h</itemPath>
-    <itemPath>TcpEpollServer.cpp</itemPath>
-    <itemPath>TcpEpollServer.h</itemPath>
-    <itemPath>TcpSock.cpp</itemPath>
-    <itemPath>TcpSock.h</itemPath>
-    <itemPath>Thread.cpp</itemPath>
-    <itemPath>Thread.h</itemPath>
-    <itemPath>ThreadLoop.cpp</itemPath>
-    <itemPath>ThreadLoop.h</itemPath>
-    <itemPath>ThreadPool.cpp</itemPath>
-    <itemPath>ThreadPool.h</itemPath>
-    <itemPath>Time.cpp</itemPath>
-    <itemPath>Time.h</itemPath>
-    <itemPath>TimeSpan.cpp</itemPath>
-    <itemPath>TimeSpan.h</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -100,6 +102,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="CommServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CommServer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Epoll.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Epoll.h" ex="false" tool="3" flavor2="0">
@@ -317,6 +323,10 @@
         <archiverTool>
         </archiverTool>
       </compileType>
+      <item path="CommServer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="CommServer.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Epoll.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Epoll.h" ex="false" tool="3" flavor2="0">

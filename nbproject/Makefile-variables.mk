@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=libcommlib.a
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libcommlib.a
+CND_ARTIFACT_NAME_Debug=libgithub.a
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libgithub.a
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=CommLib.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/CommLib.tar
+CND_PACKAGE_NAME_Debug=GitHub.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/GitHub.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-Windows
-CND_ARTIFACT_NAME_Release=libcommlib.a
-CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/libcommlib.a
+CND_ARTIFACT_NAME_Release=libgithub.a
+CND_ARTIFACT_PATH_Release=dist/Release/MinGW-Windows/libgithub.a
 CND_PACKAGE_DIR_Release=dist/Release/MinGW-Windows/package
-CND_PACKAGE_NAME_Release=CommLib.tar
-CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/CommLib.tar
+CND_PACKAGE_NAME_Release=GitHub.tar
+CND_PACKAGE_PATH_Release=dist/Release/MinGW-Windows/package/GitHub.tar
 #
 # include compiler specific variables
 #

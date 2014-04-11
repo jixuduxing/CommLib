@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/CommServer.o \
 	${OBJECTDIR}/Epoll.o \
 	${OBJECTDIR}/Lock.o \
 	${OBJECTDIR}/MemPool.o \
@@ -80,13 +81,18 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcommlib.a
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgithub.a
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcommlib.a: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgithub.a: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcommlib.a
-	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcommlib.a ${OBJECTFILES} 
-	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcommlib.a
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgithub.a
+	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgithub.a ${OBJECTFILES} 
+	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgithub.a
+
+${OBJECTDIR}/CommServer.o: CommServer.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CommServer.o CommServer.cpp
 
 ${OBJECTDIR}/Epoll.o: Epoll.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -228,6 +234,19 @@ ${TESTDIR}/tests/newsimpletest1.o: tests/newsimpletest1.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest1.o tests/newsimpletest1.cpp
 
+
+${OBJECTDIR}/CommServer_nomain.o: ${OBJECTDIR}/CommServer.o CommServer.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/CommServer.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CommServer_nomain.o CommServer.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/CommServer.o ${OBJECTDIR}/CommServer_nomain.o;\
+	fi
 
 ${OBJECTDIR}/Epoll_nomain.o: ${OBJECTDIR}/Epoll.o Epoll.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -416,7 +435,7 @@ ${OBJECTDIR}/TimeSpan_nomain.o: ${OBJECTDIR}/TimeSpan.o TimeSpan.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libcommlib.a
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libgithub.a
 
 # Subprojects
 .clean-subprojects:
