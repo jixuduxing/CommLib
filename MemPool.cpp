@@ -148,16 +148,94 @@ namespace CommLib {
         os << " free:" << PackFreeList_.size() << std::endl;
     }
 
-    MemPool::MemPool(int type) {
+    AllocPackListSimple::AllocPackListSimple(int ind)
+    : AllocPackList(ind)
+    //    ,testpool( (1 << (ind + MIN_SIZE)) - 1 )
+    {
+    }
+
+    AllocPackListSimple::~AllocPackListSimple() {
+        for (AllocPack2* pPack = PackList.RemoveHead();
+                pPack != NULL; pPack = PackList.RemoveHead()) {
+            delete pPack;
+        }
+    }
+
+    void AllocPackListSimple::PrintfSelf(std::ostream& os) {
+        CAutoLock al(lock_);
+        os << " free:" << PackList.size() << std::endl;
+    }
+
+    AllocPack* AllocPackListSimple::Alloc() {
+        AllocPack* pPack = NULL;
+        //        {
+        //            CAutoLock al(lock_);
+        //            pPack = ( AllocPack* )testpool.malloc();
+        //            return pPack;
+        //        }
+        {
+            CAutoLock al(lock_);
+            pPack = PackList.RemoveHead();
+        }
+
+        if (!pPack)
+            pPack = new AllocPack2(buffsize_, this);
+        return pPack;
+    }
+
+    void AllocPackListSimple::Free(AllocPack* pPack) {
+        pPack->reset();
+
+        CAutoLock al(lock_);
+        //        testpool.free((void*)pPack );
+        //        return;
+        PackList.AddTail((AllocPack2*) pPack);
+    }
+
+    AllocPackListBoost::AllocPackListBoost(int ind)
+    : AllocPackList(ind), boostPackpool_((1 << (ind + MIN_SIZE)) - 1 + sizeof (AllocPack)) {
+    }
+
+    AllocPackListBoost::~AllocPackListBoost() {
+    }
+
+    void AllocPackListBoost::PrintfSelf(std::ostream& os) {
+        CAutoLock al(lock_);
+        //        os << " free:" << testpool. << std::endl;
+    }
+
+    AllocPack* AllocPackListBoost::Alloc() {
+        AllocPack* pPack = NULL;
+        CAutoLock al(lock_);
+        pPack = (AllocPack*) boostPackpool_.malloc();
+        pPack->size_ = buffsize_;
+        pPack->len_ = 0;
+        pPack->pAllocList_  = this;
+        pPack->buff_ = ( (char*)pPack + sizeof(AllocPack) );
+
+        return pPack;
+    }
+
+    void AllocPackListBoost::Free(AllocPack* pPack) {
+        CAutoLock al(lock_);
+        boostPackpool_.free((void*) pPack);
+        return;
+    }
+
+    MemPool::MemPool(MemPoolType type) {
         VectSize_ = MAX_SIZE - MIN_SIZE + 1;
 
         AllocPackListVec_.resize(VectSize_);
 
         for (int i = 0; i < VectSize_; i++) {
-            if (0 == type)
+            if (default_Mp == type)
                 AllocPackListVec_[i] = new AllocPackList(i);
-            else
+            else if (careusing_Mp == type)
                 AllocPackListVec_[i] = new AllocPackList2(i);
+            else if (Boost_Mp == type)
+                AllocPackListVec_[i] = new AllocPackListBoost(i);
+            else
+                AllocPackListVec_[i] = new AllocPackListSimple(i);
         }
     }
 
@@ -173,7 +251,7 @@ namespace CommLib {
     AllocPack* MemPool::Alloc(int size) {
         AllocPack* pPack = NULL;
 
-        int ind = hash(size);
+        int ind = hashbit(size);
         if (-1 == ind)
             return pPack;
 
@@ -181,7 +259,7 @@ namespace CommLib {
     }
 
     void MemPool::Free(AllocPack* pPack) {
-        int ind = hash(pPack->getsize());
+        int ind = hashbit(pPack->getsize());
         if (-1 == ind)
             return;
 

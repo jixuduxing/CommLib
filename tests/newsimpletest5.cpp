@@ -8,6 +8,11 @@
 #include <stdlib.h>
 #include <iostream>
 #include <boost/noncopyable.hpp>
+#include <boost/pool/pool.hpp>
+#include <boost/pool/singleton_pool.hpp>
+#include <bitset>
+std::bitset<2> bset;
+
 class CopyAble:boost::noncopyable
 {
 public:

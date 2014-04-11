@@ -40,11 +40,17 @@
                    displayName="测试文件"
                    projectFiles="false"
                    kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="f8"
+                     displayName="BoostMemPoolTest"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/BoostMemPoolTest.cpp</itemPath>
+      </logicalFolder>
       <logicalFolder name="f3"
                      displayName="MemPoolTest"
                      projectFiles="true"
                      kind="TEST">
-        <itemPath>tests/newsimpletest2.cpp</itemPath>
+        <itemPath>tests/defaultMemTest.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f6"
                      displayName="TestCopyable"
@@ -80,7 +86,7 @@
                      displayName="TestThreadPool"
                      projectFiles="true"
                      kind="TEST">
-        <itemPath>tests/newsimpletest1.cpp</itemPath>
+        <itemPath>tests/TestThreadPoolandMemPoolself.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -286,13 +292,36 @@
           </linkerLibItems>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f8">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/BoostMemPoolTest</output>
+          <linkerLibItems>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
+      <item path="tests/BoostMemPoolTest.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="tests/TestEpoll.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="tests/TestThreadPoolandMemPoolself.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="tests/defaultMemTest.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="tests/newsimpletest.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/newsimpletest1.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/newsimpletest2.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/newsimpletest3.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -489,13 +518,33 @@
           <output>${TESTDIR}/TestFiles/f7</output>
         </linkerTool>
       </folder>
+      <folder path="TestFiles/f8">
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f8</output>
+        </linkerTool>
+      </folder>
+      <item path="tests/BoostMemPoolTest.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="tests/TestEpoll.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="tests/TestThreadPoolandMemPoolself.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="tests/defaultMemTest.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="tests/newsimpletest.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/newsimpletest1.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/newsimpletest2.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/newsimpletest3.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -55,6 +55,7 @@ TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
 
 # Test Files
 TESTFILES= \
+	${TESTDIR}/TestFiles/BoostMemPoolTest \
 	${TESTDIR}/TestFiles/MemPoolTest \
 	${TESTDIR}/TestFiles/TestCopyable \
 	${TESTDIR}/TestFiles/TestCTime \
@@ -164,7 +165,11 @@ ${OBJECTDIR}/TimeSpan.o: TimeSpan.cpp
 
 # Build Test Targets
 .build-tests-conf: .build-conf ${TESTFILES}
-${TESTDIR}/TestFiles/MemPoolTest: ${TESTDIR}/tests/newsimpletest2.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/BoostMemPoolTest: ${TESTDIR}/tests/BoostMemPoolTest.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/BoostMemPoolTest $^ ${LDLIBSOPTIONS} -lpthread 
+
+${TESTDIR}/TestFiles/MemPoolTest: ${TESTDIR}/tests/defaultMemTest.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/MemPoolTest $^ ${LDLIBSOPTIONS} -lpthread 
 
@@ -188,15 +193,21 @@ ${TESTDIR}/TestFiles/TestThreadLoop: ${TESTDIR}/tests/newsimpletest4.o ${OBJECTF
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/TestThreadLoop $^ ${LDLIBSOPTIONS} -lpthread 
 
-${TESTDIR}/TestFiles/TestThreadPool: ${TESTDIR}/tests/newsimpletest1.o ${OBJECTFILES:%.o=%_nomain.o}
+${TESTDIR}/TestFiles/TestThreadPool: ${TESTDIR}/tests/TestThreadPoolandMemPoolself.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/TestThreadPool $^ ${LDLIBSOPTIONS} -lpthread 
 
 
-${TESTDIR}/tests/newsimpletest2.o: tests/newsimpletest2.cpp 
+${TESTDIR}/tests/BoostMemPoolTest.o: tests/BoostMemPoolTest.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest2.o tests/newsimpletest2.cpp
+	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/BoostMemPoolTest.o tests/BoostMemPoolTest.cpp
+
+
+${TESTDIR}/tests/defaultMemTest.o: tests/defaultMemTest.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/defaultMemTest.o tests/defaultMemTest.cpp
 
 
 ${TESTDIR}/tests/newsimpletest5.o: tests/newsimpletest5.cpp 
@@ -229,10 +240,10 @@ ${TESTDIR}/tests/newsimpletest4.o: tests/newsimpletest4.cpp
 	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest4.o tests/newsimpletest4.cpp
 
 
-${TESTDIR}/tests/newsimpletest1.o: tests/newsimpletest1.cpp 
+${TESTDIR}/tests/TestThreadPoolandMemPoolself.o: tests/TestThreadPoolandMemPoolself.cpp 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest1.o tests/newsimpletest1.cpp
+	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/TestThreadPoolandMemPoolself.o tests/TestThreadPoolandMemPoolself.cpp
 
 
 ${OBJECTDIR}/CommServer_nomain.o: ${OBJECTDIR}/CommServer.o CommServer.cpp 
@@ -421,6 +432,7 @@ ${OBJECTDIR}/TimeSpan_nomain.o: ${OBJECTDIR}/TimeSpan.o TimeSpan.cpp
 .test-conf:
 	@if [ "${TEST}" = "" ]; \
 	then  \
+	    ${TESTDIR}/TestFiles/BoostMemPoolTest || true; \
 	    ${TESTDIR}/TestFiles/MemPoolTest || true; \
 	    ${TESTDIR}/TestFiles/TestCopyable || true; \
 	    ${TESTDIR}/TestFiles/TestCTime || true; \
