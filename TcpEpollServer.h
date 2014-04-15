@@ -73,7 +73,7 @@ namespace CommLib {
 
         virtual void Check() = 0;
         
-        void RemoveClient(boost::shared_ptr<TcpEpollSockImp> sock);
+        void OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock);
         //         
     private:
         int OnAccept();
@@ -90,11 +90,11 @@ namespace CommLib {
         virtual void OnAddClient(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
 
     public:
-        virtual void OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
+        virtual void OnClientClose(boost::shared_ptr<TcpEpollSockImp> sock) = 0;
 
     private:
         bool bStarted_;
-        boost::shared_ptr<Epoll> Epoll_;
+        boost::shared_ptr<Epoll> epoll_;
 
         CheckLoop checkloop_;
     };

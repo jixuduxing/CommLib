@@ -71,18 +71,20 @@ namespace CommLib {
         return OnAccept();
     }
 
-
-
-    bool TcpClientSock::InitConnect(char* szIp,int nPort)
-    {
-      SockAddr addr(nPort, szIp, Sock::IP);
-      if( -1 == Connect(addr) )
-        return false;
-
-//      assert(0 == Epoll_->epollAdd(this, Epoll::EVENT_READ));
-      this->Setnonblocking();
-
-      return true;
+    TcpClientSock::TcpClientSock()
+    : bConnected_(false) {
     }
-    
+
+    bool TcpClientSock::InitConnect(char* szIp, int nPort) {
+        SockAddr addr(nPort, szIp, Sock::IP);
+        if (-1 == Connect(addr))
+            return false;
+
+        //      assert(0 == Epoll_->epollAdd(this, Epoll::EVENT_READ));
+        this->Setnonblocking();
+        bConnected_ = true;
+        OnConnected();
+        return true;
+    }
+
 }

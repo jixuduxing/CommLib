@@ -25,6 +25,7 @@ namespace CommLib {
         Close();
 
         pEServ_->OnCloseClient(shared_from_this());
+        pEServ_->OnClientClose(shared_from_this());
         return 0;
     }
 
@@ -36,7 +37,7 @@ namespace CommLib {
             boost::shared_ptr<Epoll> epoll,
             std::string thrname,
             std::string checklpname, int looptime)
-    : Epoll_(epoll), bStarted_(false),
+    : epoll_(epoll), bStarted_(false),
     Thread(boost::bind(&TcpEpollServerImp::Schedule, this), thrname),
     checkloop_(checklpname, looptime) {
         checkloop_.pImp = this;
@@ -59,7 +60,7 @@ namespace CommLib {
             return false;
         }
 
-        assert(0 == Epoll_->epollAdd(this, Epoll::EVENT_READ));
+        assert(0 == epoll_->epollAdd(this, Epoll::EVENT_READ));
         this->Setnonblocking();
 
         StartThread();
@@ -81,8 +82,8 @@ namespace CommLib {
     }
 
     bool TcpEpollServerImp::Schedule() {
-        while (Epoll_->Schedule(10));
-        return true;
+        while (epoll_->Schedule(10));
+        return false;
     }
 
     //         
@@ -99,7 +100,7 @@ namespace CommLib {
         SockAddr skAddr(addr);
 
         sock->Setnonblocking();
-        assert(0 == Epoll_->epollAdd(sock.get(), Epoll::EVENT_READ));
+        assert(0 == epoll_->epollAdd(sock.get(), Epoll::EVENT_READ));
         sock->SetRemoteAddr(skAddr);
 
         OnAddClient(sock);
@@ -115,8 +116,8 @@ namespace CommLib {
         return Stop();
     };
 
-    void TcpEpollServerImp::RemoveClient(boost::shared_ptr<TcpEpollSockImp> sock) {
-        Epoll_->epollDel(sock.get());
+    void TcpEpollServerImp::OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock) {
+        epoll_->epollDel(sock.get());
     }
 
 }

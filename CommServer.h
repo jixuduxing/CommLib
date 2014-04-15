@@ -19,7 +19,7 @@ namespace CommLib {
         CommonServer(
                 boost::shared_ptr<Epoll> epoll,
                 boost::shared_ptr<MemPool> mempool)
-        : TcpEpollServerImp(epoll,"CommonServer","check",5), Mempool_(mempool) {
+        : TcpEpollServerImp(epoll, "CommonServer", "check", 5), mempool_(mempool) {
         }
 
         typedef std::list<boost::shared_ptr<TcpEpollSockImp> >::iterator pClientList;
@@ -27,7 +27,7 @@ namespace CommLib {
     private:
 
         virtual boost::shared_ptr<TcpEpollSockImp> MakeNewClient(int socket) {
-            return boost::shared_ptr<TcpEpollSockImp>(new ClientType(socket, Mempool_, this));
+            return boost::shared_ptr<TcpEpollSockImp>(new ClientType(socket, mempool_, this));
         }
 
         virtual void OnAddClient(boost::shared_ptr<TcpEpollSockImp> sock) {
@@ -35,7 +35,7 @@ namespace CommLib {
             ClientList_.push_back(sock);
         }
 
-        virtual void OnCloseClient(boost::shared_ptr<TcpEpollSockImp> sock) {
+        virtual void OnClientClose(boost::shared_ptr<TcpEpollSockImp> sock) {
             CAutoLock lock(lock_);
             std::list<boost::shared_ptr<TcpEpollSockImp> >::iterator iter = ClientList_.begin();
             for (; iter != ClientList_.end(); iter++) {
@@ -49,7 +49,7 @@ namespace CommLib {
             std::list<boost::shared_ptr<TcpEpollSockImp> >::iterator iter = ClientList_.begin();
             for (; iter != ClientList_.end();) {
                 if (!(*iter)->CheckValid()) {
-                    RemoveClient((*iter));
+                    OnCloseClient((*iter));
                     ClientList_.erase(iter++);
                     continue;
                 }
@@ -59,7 +59,7 @@ namespace CommLib {
 
     private:
 
-        boost::shared_ptr<MemPool> Mempool_;
+        boost::shared_ptr<MemPool> mempool_;
 
         CMutexLock lock_;
         std::list<boost::shared_ptr<TcpEpollSockImp> > ClientList_;
@@ -69,7 +69,7 @@ namespace CommLib {
     public:
 
         CommSockImp(int sock, boost::shared_ptr<MemPool> pMemPool
-                , TcpEpollServerImp* pEServ,int timeOut = 15
+                , TcpEpollServerImp* pEServ, int timeOut = 15
                 );
 
     private:

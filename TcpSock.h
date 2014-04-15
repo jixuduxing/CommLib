@@ -42,14 +42,16 @@ namespace CommLib {
 
     class TcpClientSock : public TcpSock {
     public:
-
+        TcpClientSock();
     public:
         bool InitConnect(char* szIp, int nPort);
-
+        virtual int OnConnected() = 0;
         //        virtual int OnRecv() = 0;
         //        virtual int OnSend() = 0;
         //        virtual int OnClose() = 0;
 
+    private:
+        bool bConnected_;
     };
 }
 #endif	/* TCPSOCK_H */

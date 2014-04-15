@@ -19,7 +19,7 @@ namespace CommLib {
 
     bool CommSockImp::CheckValid() {
         Time t = Time::GetCurrentTime();
-        if ( t - LastRecvTime_ > TimeOut_) {
+        if (t - LastRecvTime_ > TimeOut_) {
             //超时
             printf("超时\r\n");
             Close();

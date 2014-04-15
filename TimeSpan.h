@@ -28,7 +28,7 @@ namespace CommLib {
         TimeSpan operator +(TimeSpan &span);
         TimeSpan operator -(TimeSpan &span);
         bool operator>(TimeSpan &span);
-        
+
     private:
         long lDays_;
         int nHours_;
