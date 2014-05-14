@@ -42,6 +42,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/Semaphore.o \
 	${OBJECTDIR}/Sock.o \
+	${OBJECTDIR}/TcpEpollClient.o \
 	${OBJECTDIR}/TcpEpollServer.o \
 	${OBJECTDIR}/TcpSock.o \
 	${OBJECTDIR}/Thread.o \
@@ -61,6 +62,7 @@ TESTFILES= \
 	${TESTDIR}/TestFiles/TestCTime \
 	${TESTDIR}/TestFiles/TestEpoll \
 	${TESTDIR}/TestFiles/TestMemPool \
+	${TESTDIR}/TestFiles/f9 \
 	${TESTDIR}/TestFiles/TestThreadLoop \
 	${TESTDIR}/TestFiles/TestThreadPool
 
@@ -124,6 +126,11 @@ ${OBJECTDIR}/Sock.o: Sock.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Sock.o Sock.cpp
+
+${OBJECTDIR}/TcpEpollClient.o: TcpEpollClient.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TcpEpollClient.o TcpEpollClient.cpp
 
 ${OBJECTDIR}/TcpEpollServer.o: TcpEpollServer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -189,6 +196,10 @@ ${TESTDIR}/TestFiles/TestMemPool: ${TESTDIR}/tests/newsimpletest.o ${OBJECTFILES
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/TestMemPool $^ ${LDLIBSOPTIONS} -lpthread 
 
+${TESTDIR}/TestFiles/f9: ${TESTDIR}/tests/TestTcpEpollClient.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f9 $^ ${LDLIBSOPTIONS} -lpthread 
+
 ${TESTDIR}/TestFiles/TestThreadLoop: ${TESTDIR}/tests/newsimpletest4.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/TestThreadLoop $^ ${LDLIBSOPTIONS} -lpthread 
@@ -232,6 +243,12 @@ ${TESTDIR}/tests/newsimpletest.o: tests/newsimpletest.cpp
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest.o tests/newsimpletest.cpp
+
+
+${TESTDIR}/tests/TestTcpEpollClient.o: tests/TestTcpEpollClient.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/TestTcpEpollClient.o tests/TestTcpEpollClient.cpp
 
 
 ${TESTDIR}/tests/newsimpletest4.o: tests/newsimpletest4.cpp 
@@ -337,6 +354,19 @@ ${OBJECTDIR}/Sock_nomain.o: ${OBJECTDIR}/Sock.o Sock.cpp
 	    ${CP} ${OBJECTDIR}/Sock.o ${OBJECTDIR}/Sock_nomain.o;\
 	fi
 
+${OBJECTDIR}/TcpEpollClient_nomain.o: ${OBJECTDIR}/TcpEpollClient.o TcpEpollClient.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/TcpEpollClient.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TcpEpollClient_nomain.o TcpEpollClient.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/TcpEpollClient.o ${OBJECTDIR}/TcpEpollClient_nomain.o;\
+	fi
+
 ${OBJECTDIR}/TcpEpollServer_nomain.o: ${OBJECTDIR}/TcpEpollServer.o TcpEpollServer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	@NMOUTPUT=`${NM} ${OBJECTDIR}/TcpEpollServer.o`; \
@@ -438,6 +468,7 @@ ${OBJECTDIR}/TimeSpan_nomain.o: ${OBJECTDIR}/TimeSpan.o TimeSpan.cpp
 	    ${TESTDIR}/TestFiles/TestCTime || true; \
 	    ${TESTDIR}/TestFiles/TestEpoll || true; \
 	    ${TESTDIR}/TestFiles/TestMemPool || true; \
+	    ${TESTDIR}/TestFiles/f9 || true; \
 	    ${TESTDIR}/TestFiles/TestThreadLoop || true; \
 	    ${TESTDIR}/TestFiles/TestThreadPool || true; \
 	else  \

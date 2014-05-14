@@ -42,6 +42,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/Semaphore.o \
 	${OBJECTDIR}/Sock.o \
+	${OBJECTDIR}/TcpEpollClient.o \
 	${OBJECTDIR}/TcpEpollServer.o \
 	${OBJECTDIR}/TcpSock.o \
 	${OBJECTDIR}/Thread.o \
@@ -61,6 +62,7 @@ TESTFILES= \
 	${TESTDIR}/TestFiles/f4 \
 	${TESTDIR}/TestFiles/f7 \
 	${TESTDIR}/TestFiles/f1 \
+	${TESTDIR}/TestFiles/f9 \
 	${TESTDIR}/TestFiles/f5 \
 	${TESTDIR}/TestFiles/f2
 
@@ -124,6 +126,11 @@ ${OBJECTDIR}/Sock.o: Sock.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Sock.o Sock.cpp
+
+${OBJECTDIR}/TcpEpollClient.o: TcpEpollClient.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TcpEpollClient.o TcpEpollClient.cpp
 
 ${OBJECTDIR}/TcpEpollServer.o: TcpEpollServer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -189,6 +196,10 @@ ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/newsimpletest.o ${OBJECTFILES:%.o=%_no
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
 
+${TESTDIR}/TestFiles/f9: ${TESTDIR}/tests/TestTcpEpollClient.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f9 $^ ${LDLIBSOPTIONS} 
+
 ${TESTDIR}/TestFiles/f5: ${TESTDIR}/tests/newsimpletest4.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.cc}   -o ${TESTDIR}/TestFiles/f5 $^ ${LDLIBSOPTIONS} 
@@ -232,6 +243,12 @@ ${TESTDIR}/tests/newsimpletest.o: tests/newsimpletest.cpp
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/newsimpletest.o tests/newsimpletest.cpp
+
+
+${TESTDIR}/tests/TestTcpEpollClient.o: tests/TestTcpEpollClient.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/TestTcpEpollClient.o tests/TestTcpEpollClient.cpp
 
 
 ${TESTDIR}/tests/newsimpletest4.o: tests/newsimpletest4.cpp 
@@ -337,6 +354,19 @@ ${OBJECTDIR}/Sock_nomain.o: ${OBJECTDIR}/Sock.o Sock.cpp
 	    ${CP} ${OBJECTDIR}/Sock.o ${OBJECTDIR}/Sock_nomain.o;\
 	fi
 
+${OBJECTDIR}/TcpEpollClient_nomain.o: ${OBJECTDIR}/TcpEpollClient.o TcpEpollClient.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/TcpEpollClient.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/TcpEpollClient_nomain.o TcpEpollClient.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/TcpEpollClient.o ${OBJECTDIR}/TcpEpollClient_nomain.o;\
+	fi
+
 ${OBJECTDIR}/TcpEpollServer_nomain.o: ${OBJECTDIR}/TcpEpollServer.o TcpEpollServer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	@NMOUTPUT=`${NM} ${OBJECTDIR}/TcpEpollServer.o`; \
@@ -438,6 +468,7 @@ ${OBJECTDIR}/TimeSpan_nomain.o: ${OBJECTDIR}/TimeSpan.o TimeSpan.cpp
 	    ${TESTDIR}/TestFiles/f4 || true; \
 	    ${TESTDIR}/TestFiles/f7 || true; \
 	    ${TESTDIR}/TestFiles/f1 || true; \
+	    ${TESTDIR}/TestFiles/f9 || true; \
 	    ${TESTDIR}/TestFiles/f5 || true; \
 	    ${TESTDIR}/TestFiles/f2 || true; \
 	else  \
